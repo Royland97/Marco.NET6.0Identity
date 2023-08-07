@@ -56,7 +56,7 @@ namespace Core.Domain.Users
         public bool Active { get; set; }
 
         #region Identity
-
+        /*
         /// <summary>
         /// Gets or sets the user security stamp.
         /// </summary>
@@ -81,7 +81,7 @@ namespace Core.Domain.Users
         /// Gets or sets the user access failed count.
         /// </summary>
         public int AccessFailedCount { get; set; }
-
+        */
         /// <summary>
         /// Gets or sets the normalized email of this user.
         /// </summary>
@@ -95,7 +95,7 @@ namespace Core.Domain.Users
         /// 
         /// <remarks>This field is used for identity stores search.</remarks>
         public string NormalizedUserName { get; set; }
-
+        /*
         /// <summary>
         /// Gets or sets the user password hash.
         /// </summary>
@@ -114,7 +114,7 @@ namespace Core.Domain.Users
         /// <summary>
         /// Gets or sets the user password hash length.
         /// </summary>
-        public int PasswordHashLength { get; set; }
+        public int PasswordHashLength { get; set; }*/
 
         #endregion
 

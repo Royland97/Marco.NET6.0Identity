@@ -123,8 +123,8 @@ namespace UserInterface.Web
             {
                 var services = scope.ServiceProvider;
                 var context = services.GetRequiredService<ApplicationDbContext>();
-                context.Database.EnsureCreated();
-                // DbInitializer.Initialize(context);
+                //context.Database.EnsureCreated();
+                DbInitializer.Initialize(context);
             }
 
             app.UseStaticFiles(new StaticFileOptions
