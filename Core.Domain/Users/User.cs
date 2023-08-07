@@ -1,8 +1,11 @@
-﻿namespace Core.Domain.Users
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Core.Domain.Users
 {
     /// <summary>
     /// Represents an application user.
     /// </summary>
+    [Table("AspNetUsers")]
     public class User: Entity
     {
         #region Fields
@@ -10,157 +13,149 @@
         /// <summary>
         /// Gets or sets the user first name.
         /// </summary>
-        public virtual string FirstName { get; set; }
+        public string FirstName { get; set; }
 
         /// <summary>
         /// Gets or sets the user last name.
         /// </summary>
-        public virtual string LastName { get; set; }
+        public string LastName { get; set; }
 
         /// <summary>
         /// Gets or sets the user email.
         /// </summary>
-        public virtual string Email { get; set; }
+        public string Email { get; set; }
 
         /// <summary>
         /// Get or sets whether the email is confirmed or not.
         /// </summary>
-        public virtual bool EmailConfirmed { get; set; }
+        public bool EmailConfirmed { get; set; }
 
         /// <summary>
         /// Gets or sets the user name of this user.
         /// </summary>
-        public virtual string UserName { get; set; }
+        public string UserName { get; set; }
 
         /// <summary>
         /// Gets or sets the user GUID.
         /// </summary>
-        public virtual Guid UserGuid { get; set; }
+        public Guid UserGuid { get; set; }
 
         /// <summary>
         /// Gets or sets the user phone number.
         /// </summary>
-        public virtual string PhoneNumber { get; set; }
+        public string PhoneNumber { get; set; }
 
         /// <summary>
         /// Get or sets whether the phone number is confirmed or not.
         /// </summary>
-        public virtual bool PhoneNumberConfirmed { get; set; }
+        public bool PhoneNumberConfirmed { get; set; }
 
         /// <summary>
         /// Define whether the user is active or not in the system.
         /// </summary>
-        public virtual bool Active { get; set; }
+        public bool Active { get; set; }
 
         #region Identity
 
         /// <summary>
         /// Gets or sets the user security stamp.
         /// </summary>
-        public virtual string SecurityStamp { get; set; }
+        public string SecurityStamp { get; set; }
 
         /// <summary>
         /// Gets or sets whether the two factor authentication is enabled or not.
         /// </summary>
-        public virtual bool TwoFactorAuthenticationEnabled { get; set; }
+        public bool TwoFactorAuthenticationEnabled { get; set; }
 
         /// <summary>
         /// Gets or sets whether the user has lockout enabled or not.
         /// </summary>
-        public virtual bool LockoutEnabled { get; set; }
+        public bool LockoutEnabled { get; set; }
 
         /// <summary>
         /// Gets or sets the date and time (in UTC) when lockout ends, any time in the past is considered not locked out.
         /// </summary>
-        public virtual DateTime? LockoutEndDateUtc { get; set; }
+        public DateTime? LockoutEndDateUtc { get; set; }
 
         /// <summary>
         /// Gets or sets the user access failed count.
         /// </summary>
-        public virtual int AccessFailedCount { get; set; }
+        public int AccessFailedCount { get; set; }
 
         /// <summary>
         /// Gets or sets the normalized email of this user.
         /// </summary>
         /// 
         /// <remarks>This field is used for identity stores search.</remarks>
-        public virtual string NormalizedEmail { get; set; }
+        public string NormalizedEmail { get; set; }
 
         /// <summary>
         /// Gets or sets the normalized user name of this user.
         /// </summary>
         /// 
         /// <remarks>This field is used for identity stores search.</remarks>
-        public virtual string NormalizedUserName { get; set; }
+        public string NormalizedUserName { get; set; }
 
         /// <summary>
         /// Gets or sets the user password hash.
         /// </summary>
-        public virtual string PasswordHash { get; set; }
+        public string PasswordHash { get; set; }
 
         /// <summary>
         /// Gets or sets the user password salt.
         /// </summary>
-        public virtual byte[] PasswordSalt { get; set; }
+        public byte[] PasswordSalt { get; set; }
 
         /// <summary>
         /// Gets or sets the user password hash iterations.
         /// </summary>
-        public virtual int PasswordHashIterations { get; set; }
+        public int PasswordHashIterations { get; set; }
 
         /// <summary>
         /// Gets or sets the user password hash length.
         /// </summary>
-        public virtual int PasswordHashLength { get; set; }
+        public int PasswordHashLength { get; set; }
 
         #endregion
 
         #region Roles
-
-        private readonly ICollection<Role> _roles = new HashSet<Role>();
-
+        
         /// <summary>
-        /// Gets the user roles.
+        /// Gets the User's Roles
         /// </summary>
-        public virtual IEnumerable<Role> Roles => _roles;
+        public ICollection<Role> Roles { get; } = new List<Role>();
 
         #endregion
 
         #region Logins
-
-        private readonly ISet<UserLogin> _logins = new HashSet<UserLogin>();
-
+       
         /// <summary>
-        /// Gets the user logins.
+        /// Gets the User's Logins
         /// </summary>
-        public virtual IEnumerable<UserLogin> Logins => _logins;
+        public ICollection<UserLogin> UserLogins { get; } = new List<UserLogin>();
 
         #endregion
 
         #region Claims
-
-        private readonly ISet<UserClaim> _claims = new HashSet<UserClaim>();
-
+        
         /// <summary>
-        /// Gets the user claims.
+        /// Gets the User's Claims
         /// </summary>
-        public virtual IEnumerable<UserClaim> Claims => _claims;
+        public ICollection<UserClaim> UserClaims { get; } = new List<UserClaim>();
 
         #endregion
 
         #region Tokens
-
-        private readonly ISet<UserToken> _tokens = new HashSet<UserToken>();
-
+       
         /// <summary>
-        /// Gets the user authentication tokens.
+        /// Gets the User's Authentication Tokens
         /// </summary>
-        public virtual IEnumerable<UserToken> Tokens => _tokens;
+        public ICollection<UserToken> UserTokens { get; } = new List<UserToken>();
 
         #endregion
 
         #endregion
-
+        /*
         #region Methods
 
         /// <summary>
@@ -182,7 +177,7 @@
         {
             AccessFailedCount = 0;
         }
-
+        
         #region Roles
 
         /// <summary>
@@ -325,7 +320,7 @@
         }
 
         #endregion
-
+        
         #region Logins
 
         /// <summary>
@@ -633,5 +628,6 @@
         #endregion
 
         #endregion
+        */
     }
 }

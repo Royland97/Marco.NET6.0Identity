@@ -2,7 +2,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
-using Infrastructure.DataAccess.EntityFramework;
+using Infrastructure.DataAccess.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Autofac.Extensions.DependencyInjection;
 using Autofac;

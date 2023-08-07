@@ -1,8 +1,11 @@
-﻿namespace Core.Domain.Users
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Core.Domain.Users
 {
     /// <summary>
     /// Represents an application role.
     /// </summary>
+    [Table("AspNetRoles")]
     public class Role : Entity
     {
         #region Constants
@@ -19,66 +22,60 @@
         /// <summary>
         /// Gets or sets the name of the role. The name must be unique across all roles.
         /// </summary>
-        public virtual string Name { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the normalized name of the role. The normalized name must be unique across all roles.
         /// </summary>
-        public virtual string NormalizedName { get; set; }
+        public string NormalizedName { get; set; }
 
         /// <summary>
         /// Gets or sets the role description.
         /// </summary>
-        public virtual string Description { get; set; }
+        public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets whether this role is one of the default system roles. System roles can not be
         /// deleted.
         /// </summary>
-        public virtual bool IsSystemRole { get; set; }
+        public bool IsSystemRole { get; set; }
 
         /// <summary>
         /// Define whether the role is active or not in the system.
         /// </summary>
-        public virtual bool Active { get; set; }
+        public bool Active { get; set; }
 
         #region Resources
 
-        private readonly ICollection<Resource> _resources = new HashSet<Resource>();
-
         /// <summary>
-        /// Gets the resources of this role.
+        /// Gets the Role's Resources
         /// </summary>
-        public virtual IEnumerable<Resource> Resources => _resources;
+        public ICollection<Resource> Resources { get; } = new List<Resource>();
 
         #endregion
 
         #region Claims
 
-        private readonly ISet<RoleClaim> _claims = new HashSet<RoleClaim>();
-
         /// <summary>
-        /// Gets the role claims.
+        /// Gets the Role's Claims
         /// </summary>
-        public virtual IEnumerable<RoleClaim> Claims => _claims;
+        public ICollection<RoleClaim> RoleClaims { get; } = new List<RoleClaim>();
 
         #endregion
 
         #region Users
-
-        private readonly ICollection<User> _users = new HashSet<User>();
-
+        
         /// <summary>
-        /// Gets the users of this role.
+        /// Gets the Role's Users
         /// </summary>
-        public virtual IEnumerable<User> Users => _users;
+        public ICollection<User> Users { get; } = new List<User>();
 
         #endregion
 
         #endregion
 
         #region Methods
-
+        /*
         #region Resource
 
         /// <summary>
@@ -266,7 +263,7 @@
         }
 
         #endregion
-
+        */
         #endregion
     }
 }
