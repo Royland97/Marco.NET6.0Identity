@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
 using Infrastructure.DataAccess.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Autofac.Extensions.DependencyInjection;
-using Autofac;
+using Core.DataAccess.Users;
+using Infrastructure.DataAccess.Users;
+using Infrastructure.Services.Users.Services;
+using Infrastructure.Services.Users.IServices;
+using Infrastructure.Services;
 
 namespace UserInterface.Web
 {
@@ -107,11 +110,12 @@ namespace UserInterface.Web
                     });
             });
 
-            builder.Services.AddControllers();
+            builder.Services.AddAutoMapper(typeof(BaseProfile));
+            builder.Services.AddControllersWithViews();
 
             //Dependencies
-            builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-            builder.Host.ConfigureContainer<ContainerBuilder>(builder => ConfigureContainer(builder));
+            builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
+            builder.Services.AddScoped(typeof(IUserServices), typeof(UserServices));
 
             #endregion
 
@@ -123,8 +127,13 @@ namespace UserInterface.Web
             {
                 var services = scope.ServiceProvider;
                 var context = services.GetRequiredService<ApplicationDbContext>();
-                //context.Database.EnsureCreated();
-                DbInitializer.Initialize(context);
+                context.Database.EnsureCreated();
+                //DbInitializer.Initialize(context);
+            }
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
             }
 
             app.UseStaticFiles(new StaticFileOptions
@@ -140,29 +149,16 @@ namespace UserInterface.Web
 
             app.UseAuthentication();
             app.UseAuthorization();
-            /*
+            
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");*/
+                pattern: "{controller=Home}/{action=Index}/");
 
-            app.MapRazorPages();
+            //app.MapRazorPages();
 
             app.Run();
 
             #endregion
-        }
-        
-        /// <summary>
-        /// Configures the Autofac container.
-        /// </summary>
-        ///
-        /// <param name="builder">Autofac container builder to configure the container</param>
-        public static void ConfigureContainer(ContainerBuilder builder)
-        {/*
-            builder.RegisterModule(new DataAccessModule());
-            builder.RegisterModule(new ReflectionModule());
-            builder.RegisterModule(new UsersModule());
-            builder.RegisterModule(new IdentityModule());*/
         }
 
         #endregion

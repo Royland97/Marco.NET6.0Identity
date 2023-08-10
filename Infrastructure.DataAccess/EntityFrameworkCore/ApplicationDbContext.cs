@@ -26,6 +26,8 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             new IdentityModelBuilder().Configure(modelBuilder);
         }
 
