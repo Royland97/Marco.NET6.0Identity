@@ -13,6 +13,7 @@
         public string UserName { get; set; }
         public string PhoneNumber { get; set; }
         public bool PhoneNumberConfirmed { get; set; }
+        public List<int> RoleIds { get; set; }
         public bool Active { get; set; }
     }
 }

@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Users\Models\Resolvers\" />
     <Folder Include="Users\Validators\" />
   </ItemGroup>
 

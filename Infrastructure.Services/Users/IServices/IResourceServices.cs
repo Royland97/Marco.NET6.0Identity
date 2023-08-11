@@ -3,47 +3,47 @@
 namespace Infrastructure.Services.Users.IServices
 {
     /// <summary>
-    /// User Services Interface
+    /// Resource Services Interface
     /// </summary>
-    public interface IUserServices
+    public interface IResourceServices
     {
         /// <summary>
-        /// Saves a User
+        /// Saves a Resource
         /// </summary>
-        /// <param name="userModel"></param>
+        /// <param name="resourceModel"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SaveUserAsync(UserModel userModel, CancellationToken cancellationToken);
+        Task SaveResourceAsync(ResourceModel resourceModel, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Updates a User
+        /// Updates a Resource
         /// </summary>
-        /// <param name="userModel"></param>
+        /// <param name="resourceModel"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task UpdateUserAsync(UserModel userModel, CancellationToken cancellationToken);
+        Task UpdateResourceAsync(ResourceModel resourceModel, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Deletes a User
+        /// Deletes a Resource
         /// </summary>
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task DeleteUserAsync(int id, CancellationToken cancellationToken);
+        Task DeleteResourceAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets All Users
+        /// Gets All Resources
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<List<UserModelList>> GetAllUsersAsync(CancellationToken cancellationToken);
+        Task<List<ResourceModel>> GetAllResourcesAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets an User by it's Id
+        /// Gets an Resource by it's Id
         /// </summary>
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<UserModel> GetUserByIdAsync(int id, CancellationToken cancellationToken);
+        Task<ResourceModel> GetResourceByIdAsync(int id, CancellationToken cancellationToken);
     }
 }

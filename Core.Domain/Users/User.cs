@@ -135,5 +135,6 @@ namespace Core.Domain.Users
         /// Gets the User's Authentication Tokens
         /// </summary>
         public ICollection<UserToken> UserTokens { get; } = new List<UserToken>();
+
     }
 }

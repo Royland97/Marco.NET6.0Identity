@@ -3,47 +3,47 @@
 namespace Infrastructure.Services.Users.IServices
 {
     /// <summary>
-    /// User Services Interface
+    /// Role Services Interface
     /// </summary>
-    public interface IUserServices
+    public interface IRoleServices
     {
         /// <summary>
-        /// Saves a User
+        /// Saves a Role
         /// </summary>
-        /// <param name="userModel"></param>
+        /// <param name="roleModel"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task SaveUserAsync(UserModel userModel, CancellationToken cancellationToken);
+        Task SaveRoleAsync(RoleModel roleModel, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Updates a User
+        /// Updates a Role
         /// </summary>
-        /// <param name="userModel"></param>
+        /// <param name="roleModel"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task UpdateUserAsync(UserModel userModel, CancellationToken cancellationToken);
+        Task UpdateRoleAsync(RoleModel roleModel, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Deletes a User
+        /// Deletes a Role
         /// </summary>
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task DeleteUserAsync(int id, CancellationToken cancellationToken);
+        Task DeleteRoleAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets All Users
+        /// Gets All Roles
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<List<UserModelList>> GetAllUsersAsync(CancellationToken cancellationToken);
+        Task<List<RoleModelList>> GetAllRolesAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets an User by it's Id
+        /// Gets a Role by it's Id
         /// </summary>
         /// <param name="id"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<UserModel> GetUserByIdAsync(int id, CancellationToken cancellationToken);
+        Task<RoleModelList> GetRoleByIdAsync(int id, CancellationToken cancellationToken);
     }
 }

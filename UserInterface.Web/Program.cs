@@ -116,6 +116,10 @@ namespace UserInterface.Web
             //Dependencies
             builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
             builder.Services.AddScoped(typeof(IUserServices), typeof(UserServices));
+            builder.Services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
+            builder.Services.AddScoped(typeof(IRoleServices), typeof(RoleServices));
+            builder.Services.AddScoped(typeof(IResourceRepository), typeof(ResourceRepository));
+            builder.Services.AddScoped(typeof(IResourceServices), typeof(ResourceServices));
 
             #endregion
 

@@ -11,7 +11,7 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
         {
             applicationDbContext.Database.EnsureCreated();
 
-            ///Role
+            //Role
             var adminRole = new Role
             {
                 Active = true,
@@ -24,9 +24,7 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
 
             applicationDbContext.SaveChanges();
 
-            ///User
-
-            var buffer = new byte[32];
+            //User
 
             var adminUser = new User
             {

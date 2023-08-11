@@ -6,89 +6,83 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.DataAccess.Users
 {
     /// <summary>
-    /// User Repository
+    /// Resource Repository
     /// </summary>
-    public class UserRepository: IUserRepository
+    public class ResourceRepository: IResourceRepository
     {
         private readonly ApplicationDbContext context;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UserRepository"/> class.
+        /// Initializes a new instance of the <see cref="ResourceRepository"/> class.
         /// </summary>
         /// <param name="context"></param>
-        public UserRepository(ApplicationDbContext context)
+        public ResourceRepository(ApplicationDbContext context)
         {
             this.context = context;
         }
 
         /// <summary>
-        /// Saves a new User
+        /// Saves a new Resource
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="resource"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task SaveUserAsync (User user)
+        public async Task SaveResourceAsync(Resource resource)
         {
-            if(user == null)
+            if (resource == null)
                 throw new ArgumentNullException();
 
-            user.UserGuid = Guid.NewGuid();
-
-            await context.Users.AddAsync(user);
-            /*
-            var roles = context.Roles.First();
-            roles.Users.Add(user);*/
-
+            await context.Resources.AddAsync(resource);
             await context.SaveChangesAsync();
         }
 
         /// <summary>
-        /// Updates a User
+        /// Updates a Resource
         /// </summary>
-        /// <param name="user"></param>
+        /// <param name="resource"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task UpdateUserAsync (User user)
+        public async Task UpdateResourceAsync(Resource resource)
         {
-            if (user == null)
+            if (resource == null)
                 throw new ArgumentNullException();
 
-            context.Entry(user).State = EntityState.Modified;
+            context.Entry(resource).State = EntityState.Modified;
             await context.SaveChangesAsync();
         }
 
         /// <summary>
-        /// Delete a User
+        /// Delete a Resource
         /// </summary>
         /// <param name="id"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task DeleteUserAsync(int id)
+        public async Task DeleteResourceAsync(int id)
         {
-            User user = await GetUserByIdAsync(id);
+            Resource resource = await GetResourceByIdAsync(id);
 
-            context.Users.Remove(user);
+            context.Resources.Remove(resource);
             await context.SaveChangesAsync();
         }
 
         /// <summary>
-        /// Gets a User by it's Id
+        /// Gets a Resource by it's Id
         /// </summary>
         /// <param name="id"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public async Task<User> GetUserByIdAsync (int id)
+        public async Task<Resource> GetResourceByIdAsync(int id)
         {
-            if(id < 0)
+            if (id < 0)
                 throw new ArgumentNullException();
 
-            return await context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            return await context.Resources.SingleOrDefaultAsync(u => u.Id == id);
         }
 
         /// <summary>
-        /// Gets all Users
+        /// Gets all Resources
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<User>> GetAllUsersAsync ()
+        public async Task<IEnumerable<Resource>> GetAllResourcesAsync()
         {
-            return await context.Users.ToListAsync();
+            return await context.Resources.ToListAsync();
         }
 
     }
