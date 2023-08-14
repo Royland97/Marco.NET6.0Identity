@@ -64,7 +64,6 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore.Identity
                 b.Property(r => r.Name).HasMaxLength(256);
                 b.Property(r => r.NormalizedName).HasMaxLength(256);
 
-                b.HasMany(r => r.Users).WithMany(r => r.Roles).UsingEntity("AspNetUserRoles");
                 b.HasMany(r => r.Resources).WithMany(r => r.Roles).UsingEntity("AspNetResourceRoles");
                 b.HasMany(r => r.RoleClaims);
             });
@@ -78,8 +77,6 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore.Identity
             modelBuilder.Entity<Resource>(b =>
             {
                 b.HasKey(r => r.Id);
-
-                b.HasMany(r => r.Roles).WithMany(r => r.Resources).UsingEntity("AspNetResourceRoles");
             });
         }
     }

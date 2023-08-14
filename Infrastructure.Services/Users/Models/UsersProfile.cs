@@ -1,5 +1,4 @@
 ﻿using Core.Domain.Users;
-using Infrastructure.Services.Users.Models.Resolvers;
 
 namespace Infrastructure.Services.Users.Models
 {

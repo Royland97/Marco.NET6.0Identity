@@ -13,16 +13,19 @@ namespace Infrastructure.Services.Users.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly IRoleRepository _roleRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserServices"/> class.
         /// </summary>
         /// <param name="userRepository"></param>
         /// <param name="mapper"></param>
-        public UserServices(IUserRepository userRepository, IMapper mapper)
+        /// <param name="roleRepository"></param>
+        public UserServices(IUserRepository userRepository, IMapper mapper, IRoleRepository roleRepository)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _roleRepository = roleRepository;
         }
 
         /// <summary>
@@ -36,6 +39,12 @@ namespace Infrastructure.Services.Users.Services
             cancellationToken.ThrowIfCancellationRequested();
 
             var user = _mapper.Map<User>(userModel);
+            
+            var roles = await _roleRepository.GetAllRoleByIdsAsync(userModel.RoleIds);
+
+            foreach(var role in roles)
+                user.Roles.Add(role);
+
             await _userRepository.SaveUserAsync(user);
         }
 
@@ -50,6 +59,13 @@ namespace Infrastructure.Services.Users.Services
             cancellationToken.ThrowIfCancellationRequested();
 
             var user = _mapper.Map<User>(userModel);
+            
+            var roles = await _roleRepository.GetAllRoleByIdsAsync(userModel.RoleIds);
+
+            user.Roles.Clear();
+            foreach (var role in roles)
+                user.Roles.Add(role);
+            
             await _userRepository.UpdateUserAsync(user);
         }
 

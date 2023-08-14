@@ -77,6 +77,25 @@ namespace Infrastructure.DataAccess.Users
         }
 
         /// <summary>
+        /// Gets All Roles by their Ids
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public async Task<List<Role>> GetAllRoleByIdsAsync(List<int> ids)
+        {
+            List<Role> roles = new();
+
+            foreach (int id in ids)
+            {
+                var role = await GetRoleByIdAsync(id);
+                if(role != null)
+                    roles.Add(role);
+            }
+
+            return roles;
+        }
+
+        /// <summary>
         /// Gets all Roles
         /// </summary>
         /// <returns></returns>

@@ -9,6 +9,7 @@
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsSystemRole { get; set; }
+        public List<int> ResourcesIds { get; set; }
         public bool Active { get; set; }
     }
 }

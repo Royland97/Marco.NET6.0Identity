@@ -41,5 +41,12 @@ namespace Core.DataAccess.Users
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<Resource>> GetAllResourcesAsync();
+
+        /// <summary>
+        /// Gets All Resources by their Ids
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        Task<List<Resource>> GetAllResourceByIdsAsync(List<int> ids);
     }
 }

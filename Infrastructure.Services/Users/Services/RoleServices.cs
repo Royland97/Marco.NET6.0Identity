@@ -13,16 +13,19 @@ namespace Infrastructure.Services.Users.Services
     {
         private readonly IRoleRepository _roleRepository;
         private readonly IMapper _mapper;
+        private readonly IResourceRepository _resourceRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleServices"/> class.
         /// </summary>
         /// <param name="roleRepository"></param>
         /// <param name="mapper"></param>
-        public RoleServices(IRoleRepository roleRepository, IMapper mapper)
+        /// <param name="resourceRepository"></param>
+        public RoleServices(IRoleRepository roleRepository, IMapper mapper, IResourceRepository resourceRepository)
         {
             _roleRepository = roleRepository;
             _mapper = mapper;
+            _resourceRepository = resourceRepository;
         }
 
         /// <summary>
@@ -36,6 +39,12 @@ namespace Infrastructure.Services.Users.Services
             cancellationToken.ThrowIfCancellationRequested();
 
             var role = _mapper.Map<Role>(roleModel);
+
+            var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds);
+
+            foreach (var resource in resources)
+                role.Resources.Add(resource);
+
             await _roleRepository.SaveRoleAsync(role);
         }
 
@@ -50,6 +59,13 @@ namespace Infrastructure.Services.Users.Services
             cancellationToken.ThrowIfCancellationRequested();
 
             var role = _mapper.Map<Role>(roleModel);
+
+            var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds);
+
+            role.Resources.Clear();
+            foreach (var resource in resources)
+                role.Resources.Add(resource);
+
             await _roleRepository.UpdateRoleAsync(role);
         }
 
@@ -92,5 +108,6 @@ namespace Infrastructure.Services.Users.Services
             Role role = await _roleRepository.GetRoleByIdAsync(id);
             return _mapper.Map<RoleModelList>(role);
         }
+
     }
 }

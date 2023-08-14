@@ -34,10 +34,6 @@ namespace Infrastructure.DataAccess.Users
             user.UserGuid = Guid.NewGuid();
 
             await context.Users.AddAsync(user);
-            /*
-            var roles = context.Roles.First();
-            roles.Users.Add(user);*/
-
             await context.SaveChangesAsync();
         }
 

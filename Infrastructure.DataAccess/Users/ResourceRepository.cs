@@ -77,6 +77,25 @@ namespace Infrastructure.DataAccess.Users
         }
 
         /// <summary>
+        /// Gets All Resources by their Ids
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        public async Task<List<Resource>> GetAllResourceByIdsAsync(List<int> ids) 
+        { 
+            List<Resource> resources = new();
+
+            foreach (int id in ids)
+            {
+                var resource = await GetResourceByIdAsync(id);
+                if(resource != null)
+                    resources.Add(resource);
+            }
+
+            return resources;
+        }
+
+        /// <summary>
         /// Gets all Resources
         /// </summary>
         /// <returns></returns>

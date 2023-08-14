@@ -48,5 +48,12 @@ namespace Core.DataAccess.Users
         /// <param name="ids"></param>
         /// <returns></returns>
         List<Role> GetAllByIdsRoles(List<int> ids);
+
+        /// <summary>
+        /// Gets All Roles by their Ids
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        Task<List<Role>> GetAllRoleByIdsAsync(List<int> ids);
     }
 }
