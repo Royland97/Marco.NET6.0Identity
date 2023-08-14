@@ -1,15 +1,15 @@
-﻿namespace Infrastructure.Services.Users.Models
+﻿namespace UserInterface.Web.ViewModels.Users
 {
     /// <summary>
-    /// Role Model
+    /// Role Model for list operations
     /// </summary>
-    public class RoleModel
+    public class RoleModelList
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string NormalizedName { get; set; }
         public string Description { get; set; }
         public bool IsSystemRole { get; set; }
-        public List<int> ResourcesIds { get; set; }
         public bool Active { get; set; }
     }
 }

@@ -1,6 +1,8 @@
-﻿using Infrastructure.Services.Users.Models;
-using Infrastructure.Services.Users.IServices;
+﻿using AutoMapper;
+using Core.DataAccess.IRepository.Users;
+using Core.Domain.Users;
 using Microsoft.AspNetCore.Mvc;
+using UserInterface.Web.ViewModels.Users;
 
 namespace UserInterface.Web.Controllers.Users
 {
@@ -10,15 +12,24 @@ namespace UserInterface.Web.Controllers.Users
     [Route("/users")]
     public class UserController : Controller
     {
-        private readonly IUserServices _userServices;
+        private readonly IUserRepository _userRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserController"/> class.
         /// </summary>
-        /// <param name="userServices"></param>
-        public UserController(IUserServices userServices)
+        /// <param name="userRepository"></param>
+        /// <param name="roleRepository"></param>
+        /// <param name="mapper"></param>
+        public UserController(
+            IUserRepository userRepository,
+            IRoleRepository roleRepository,
+            IMapper mapper)
         {
-            _userServices = userServices;
+            _userRepository = userRepository;
+            _roleRepository = roleRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -39,11 +50,20 @@ namespace UserInterface.Web.Controllers.Users
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
-                await _userServices.SaveUserAsync(userModel, cancellationToken);
-                return Ok(userModel);
+                var user = _mapper.Map<User>(userModel);
 
+                var roles = await _roleRepository.GetAllRoleByIdsAsync(userModel.RoleIds, cancellationToken);
+
+                foreach (var role in roles)
+                    user.Roles.Add(role);
+
+                await _userRepository.SaveUserAsync(user, cancellationToken);
+
+                return Ok(userModel);
             }
             catch (Exception ex)
             {
@@ -69,11 +89,21 @@ namespace UserInterface.Web.Controllers.Users
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
-                await _userServices.UpdateUserAsync(userModel, cancellationToken);
-                return Ok(userModel);
+                var user = _mapper.Map<User>(userModel);
 
+                var roles = await _roleRepository.GetAllRoleByIdsAsync(userModel.RoleIds, cancellationToken);
+
+                user.Roles.Clear();
+                foreach (var role in roles)
+                    user.Roles.Add(role);
+
+                await _userRepository.UpdateUserAsync(user, cancellationToken);
+
+                return Ok(userModel);
             }
             catch (Exception ex)
             {
@@ -98,14 +128,16 @@ namespace UserInterface.Web.Controllers.Users
             [FromRoute] int id,
             CancellationToken cancellationToken = default)
         {
-            var userDto = await _userServices.GetUserByIdAsync(id, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var userDto = await _userRepository.GetUserByIdAsync(id, cancellationToken);
 
             if (userDto == null)
                 return NotFound(id);
 
             try
             {
-                await _userServices.DeleteUserAsync(id, cancellationToken);
+                await _userRepository.DeleteUserAsync(id, cancellationToken);
                 return Ok();
             }
             catch (Exception ex)
@@ -122,19 +154,23 @@ namespace UserInterface.Web.Controllers.Users
         /// </param>
         /// <response code="200">User found with the provided search options</response>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<UserModelList>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
-                var users = await _userServices.GetAllUsersAsync(cancellationToken);
-                return Ok(users);
+                var result = await _userRepository.GetAllUsersAsync(cancellationToken);
+                var resources =  _mapper.Map<List<UserModelList>>(result);
 
-            }catch (Exception ex)
+                return Ok(resources);
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -157,12 +193,16 @@ namespace UserInterface.Web.Controllers.Users
             [FromRoute] int id,
             CancellationToken cancellationToken = default)
         {
-            var userDto = await _userServices.GetUserByIdAsync(id, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            if (userDto == null)
+            var user = await _userRepository.GetUserByIdAsync(id, cancellationToken);
+
+            if (user == null)
                 return NotFound(id);
 
-            return Ok(userDto);
+            var userModel = _mapper.Map<UserModel>(user);
+
+            return Ok(userModel);
         }
 
     }

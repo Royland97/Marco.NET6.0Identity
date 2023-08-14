@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Services.Users.Models
+﻿namespace UserInterface.Web.ViewModels.Users
 {
     /// <summary>
     /// User Model
@@ -13,6 +13,7 @@
         public string UserName { get; set; }
         public string PhoneNumber { get; set; }
         public bool PhoneNumberConfirmed { get; set; }
+        public string Password { get; set; }
         public List<int> RoleIds { get; set; }
         public bool Active { get; set; }
     }

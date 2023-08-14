@@ -1,5 +1,7 @@
-﻿using Infrastructure.Services.Users.IServices;
+﻿using AutoMapper;
+using Core.DataAccess.IRepository.Users;
 using Microsoft.AspNetCore.Mvc;
+using UserInterface.Web.ViewModels.Users;
 
 namespace UserInterface.Web.Controllers.Users
 {
@@ -9,15 +11,18 @@ namespace UserInterface.Web.Controllers.Users
     [Route("/resources")]
     public class ResourceController : Controller
     {
-        private readonly IResourceServices _resourceServices;
+        private readonly IResourceRepository _resourceRepository;
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceController"/> class.
         /// </summary>
-        /// <param name="resourceServices"></param>
-        public ResourceController(IResourceServices resourceServices)
+        /// <param name="resourceRepository"></param>
+        /// <param name="mapper"></param>
+        public ResourceController(IResourceRepository resourceRepository, IMapper mapper)
         {
-            _resourceServices = resourceServices;
+            _resourceRepository = resourceRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -28,18 +33,21 @@ namespace UserInterface.Web.Controllers.Users
         /// </param>
         /// <response code="200">Resource found with the provided search options</response>
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<ResourceModel>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
-                var resources = await _resourceServices.GetAllResourcesAsync(cancellationToken);
-                return Ok(resources);
+                var result = await _resourceRepository.GetAllResourcesAsync(cancellationToken);
+                var resources = _mapper.Map<List<ResourceModel>>(result);
 
+                return Ok(resources);
             }
             catch (Exception ex)
             {

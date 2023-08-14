@@ -1,5 +1,5 @@
-﻿namespace Infrastructure.Services.Users.Models
-{
+﻿namespace UserInterface.Web.ViewModels.Users 
+{ 
     /// <summary>
     /// Resource Model
     /// </summary>

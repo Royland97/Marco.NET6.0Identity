@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.Services.Users.Models
+﻿namespace UserInterface.Web.ViewModels.Users
 {
     /// <summary>
     /// User Model used for list operations

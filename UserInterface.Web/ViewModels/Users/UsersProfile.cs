@@ -1,6 +1,6 @@
 ﻿using Core.Domain.Users;
 
-namespace Infrastructure.Services.Users.Models
+namespace UserInterface.Web.ViewModels.Users
 {
     /// <summary>
     /// User, Role and Resource Profile

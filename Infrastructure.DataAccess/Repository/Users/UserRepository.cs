@@ -1,9 +1,9 @@
-﻿using Core.DataAccess.Users;
+﻿using Core.DataAccess.IRepository.Users;
 using Core.Domain.Users;
 using Infrastructure.DataAccess.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.DataAccess.Users
+namespace Infrastructure.DataAccess.Repository.Users
 {
     /// <summary>
     /// User Repository
@@ -25,66 +25,71 @@ namespace Infrastructure.DataAccess.Users
         /// Saves a new User
         /// </summary>
         /// <param name="user"></param>
+        /// <param name="cancellationToken"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task SaveUserAsync (User user)
+        public async Task SaveUserAsync(User user, CancellationToken cancellationToken)
         {
             if(user == null)
                 throw new ArgumentNullException();
 
             user.UserGuid = Guid.NewGuid();
 
-            await context.Users.AddAsync(user);
-            await context.SaveChangesAsync();
+            await context.Users.AddAsync(user, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
         /// Updates a User
         /// </summary>
         /// <param name="user"></param>
+        /// <param name="cancellationToken"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task UpdateUserAsync (User user)
+        public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
             if (user == null)
                 throw new ArgumentNullException();
 
             context.Entry(user).State = EntityState.Modified;
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
         /// Delete a User
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task DeleteUserAsync(int id)
+        public async Task DeleteUserAsync(int id, CancellationToken cancellationToken)
         {
-            User user = await GetUserByIdAsync(id);
+            User user = await GetUserByIdAsync(id, cancellationToken);
 
             context.Users.Remove(user);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
         }
 
         /// <summary>
         /// Gets a User by it's Id
         /// </summary>
         /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <returns></returns>
-        public async Task<User> GetUserByIdAsync (int id)
+        public async Task<User> GetUserByIdAsync(int id, CancellationToken cancellationToken)
         {
             if(id < 0)
                 throw new ArgumentNullException();
 
-            return await context.Users.SingleOrDefaultAsync(u => u.Id == id);
+            return await context.Users.SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
 
         /// <summary>
         /// Gets all Users
         /// </summary>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<User>> GetAllUsersAsync ()
+        public async Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken)
         {
-            return await context.Users.ToListAsync();
+            return await context.Users.ToListAsync(cancellationToken);
         }
 
     }

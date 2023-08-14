@@ -4,11 +4,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
 using Infrastructure.DataAccess.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Core.DataAccess.Users;
-using Infrastructure.DataAccess.Users;
-using Infrastructure.Services.Users.Services;
-using Infrastructure.Services.Users.IServices;
-using Infrastructure.Services;
+using Core.DataAccess.IRepository.Users;
+using Infrastructure.DataAccess.Repository.Users;
+using UserInterface.Web.ViewModels;
 
 namespace UserInterface.Web
 {
@@ -115,11 +113,8 @@ namespace UserInterface.Web
 
             //Dependencies
             builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
-            builder.Services.AddScoped(typeof(IUserServices), typeof(UserServices));
             builder.Services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
-            builder.Services.AddScoped(typeof(IRoleServices), typeof(RoleServices));
             builder.Services.AddScoped(typeof(IResourceRepository), typeof(ResourceRepository));
-            builder.Services.AddScoped(typeof(IResourceServices), typeof(ResourceServices));
 
             #endregion
 
@@ -157,8 +152,6 @@ namespace UserInterface.Web
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/");
-
-            //app.MapRazorPages();
 
             app.Run();
 
