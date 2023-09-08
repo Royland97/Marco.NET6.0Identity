@@ -29,9 +29,6 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <exception cref="ArgumentNullException"></exception>
         public async Task SaveRoleAsync(Role role, CancellationToken cancellationToken)
         {
-            if (role == null)
-                throw new ArgumentNullException();
-
             await context.Roles.AddAsync(role, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -44,9 +41,6 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <exception cref="ArgumentNullException"></exception>
         public async Task UpdateRoleAsync(Role role, CancellationToken cancellationToken)
         {
-            if (role == null)
-                throw new ArgumentNullException();
-
             context.Entry(role).State = EntityState.Modified;
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -74,10 +68,17 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <returns></returns>
         public async Task<Role> GetRoleByIdAsync(int id, CancellationToken cancellationToken)
         {
-            if (id < 0)
-                throw new ArgumentNullException();
+            return await context.Roles.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        }
 
-            return await context.Roles.SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        /// <summary>
+        /// Gets all Roles
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken)
+        {
+            return await context.Roles.ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -93,37 +94,12 @@ namespace Infrastructure.DataAccess.Repository.Users
             foreach (int id in ids)
             {
                 var role = await GetRoleByIdAsync(id, cancellationToken);
-                if(role != null)
+                if (role != null)
                     roles.Add(role);
             }
 
             return roles;
         }
 
-        /// <summary>
-        /// Gets all Roles
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken)
-        {
-            return await context.Roles.ToListAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// Gets a List of Roles
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public List<Role> GetAllByIdsRoles(List<int> ids, CancellationToken cancellationToken)
-        {
-            List<Role> roles = new();    
-
-            foreach(int id in ids)
-                roles.Add(GetRoleByIdAsync(id, cancellationToken).GetAwaiter().GetResult());
-
-            return roles;
-        }
     }
 }

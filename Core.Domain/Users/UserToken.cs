@@ -6,6 +6,7 @@ namespace Core.Domain.Users
     /// Associate an Authentication Token to a User
     /// </summary>
     [Table("AspNetUserTokens")]
+    [NotMapped]
     public class UserToken: Entity
     {
         #region Fields

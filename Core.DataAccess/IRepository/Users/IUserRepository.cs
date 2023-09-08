@@ -46,5 +46,12 @@ namespace Core.DataAccess.IRepository.Users
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IEnumerable<User>> GetAllUsersAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets an User by it's name.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        Task<User> GetUserByNameAsync(string name);
     }
 }

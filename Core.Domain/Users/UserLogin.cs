@@ -6,6 +6,7 @@ namespace Core.Domain.Users
     /// Associate an User to a Login
     /// </summary>
     [Table("AspNetUserLogins")]
+    [NotMapped]
     public class UserLogin : Entity
     {
         #region Fields

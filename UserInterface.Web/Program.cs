@@ -1,12 +1,12 @@
 using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Security.Claims;
 using Infrastructure.DataAccess.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Core.DataAccess.IRepository.Users;
 using Infrastructure.DataAccess.Repository.Users;
 using UserInterface.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using UserInterface.Web.Authorization;
+using UserInterface.Web.Installation;
 
 namespace UserInterface.Web
 {
@@ -37,84 +37,38 @@ namespace UserInterface.Web
 
             //DBContext
             builder.Services.AddDbContext<ApplicationDbContext>(
-                options => options.UseSqlServer(builder.Configuration.GetConnectionString("Marco.NET6.0")));
-            
-            //Authentication and Authoritation
-            builder.Services.AddAuthenticationCore(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            });
-            
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                //Password settings
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
+                options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer")));
 
-                //Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-
-                //User settings
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
+            //Authentication and Authorization
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ResourceAuthorize", policy => policy.Requirements.Add(new ResourceAuthorizationRequirement()));
             });
 
-            builder.Services.Configure<PasswordHasherOptions>(options =>
-            {
-                options.IterationCount = 12000;
-            });
-
-            builder.Services.AddTransient<ClaimsPrincipal>(s => s.GetService<IHttpContextAccessor>().HttpContext.User);
-            
-            //Cookies
-            builder.Services.ConfigureApplicationCookie(options =>
-            {
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-                /*
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    if (context.Request.Path.StartsWithSegments("/api")
-                    && context.Response.StatusCode == StatusCodes.Status200OK)
-                    {
-                        context.Response.Clear();
-                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                        return Task.FromResult<object>(null);
-                    }
-                    context.Response.Redirect(context.RedirectUri);
-                    return Task.FromResult<object>(null);
-                };
-
-                options.LoginPath = "/Identity/Account/Login";
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-                options.SlidingExpiration = true;*/
-            });
+            //Identity
 
             //CORS
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(name: "AllowAllPolicy",
+                options.AddPolicy(name: "AllowAllCorsPolicy",
                     policy =>
                     {
                         policy.AllowAnyHeader();
                         policy.AllowAnyMethod();
                         policy.AllowAnyOrigin();
+                        //policy.AllowCredentials();
                     });
             });
 
             builder.Services.AddAutoMapper(typeof(BaseProfile));
+
             builder.Services.AddControllersWithViews();
 
             //Dependencies
             builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
             builder.Services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
             builder.Services.AddScoped(typeof(IResourceRepository), typeof(ResourceRepository));
+            builder.Services.AddScoped(typeof(IAuthorizationHandler), typeof(ResourceAuthorizationHandler));
 
             #endregion
 
@@ -125,9 +79,16 @@ namespace UserInterface.Web
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                context.Database.EnsureCreated();
-                //DbInitializer.Initialize(context);
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    DbInitializer.Initialize(context);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred creating the DB.");
+                }
             }
 
             if (app.Environment.IsDevelopment())
@@ -144,7 +105,7 @@ namespace UserInterface.Web
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseCors("AllowAllPolicy");
+            app.UseCors("AllowAllCorsPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();

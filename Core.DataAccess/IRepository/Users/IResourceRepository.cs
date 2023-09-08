@@ -11,9 +11,15 @@ namespace Core.DataAccess.IRepository.Users
         /// Saves a new Resource
         /// </summary>
         /// <param name="resource"></param>
-        /// <param name="cancellationToken"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        Task SaveResourceAsync(Resource resource, CancellationToken cancellationToken);
+        Task SaveResourceAsync(Resource resource);
+
+        /// <summary>
+        /// Saves a List of Resources
+        /// </summary>
+        /// <param name="resources"></param>
+        /// <returns></returns>
+        Task SaveAllResourcesAsync(List<Resource> resources);
 
         /// <summary>
         /// Updates a Resource

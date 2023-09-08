@@ -25,7 +25,7 @@ namespace Core.Domain.Users
         /// <summary>
         /// Gets the Resource's Roles
         /// </summary>
-        public ICollection<Role> Roles { get; } = new List<Role>();
+        public List<Role> Roles { get; set; } = new List<Role>();
 
         #endregion
 

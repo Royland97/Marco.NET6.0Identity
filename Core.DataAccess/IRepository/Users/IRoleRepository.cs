@@ -48,14 +48,6 @@ namespace Core.DataAccess.IRepository.Users
         Task<IEnumerable<Role>> GetAllRolesAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets a List of Roles
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        List<Role> GetAllByIdsRoles(List<int> ids, CancellationToken cancellationToken);
-
-        /// <summary>
         /// Gets All Roles by their Ids
         /// </summary>
         /// <param name="ids"></param>

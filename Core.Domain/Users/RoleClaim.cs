@@ -6,6 +6,7 @@ namespace Core.Domain.Users
     /// Represents a Claim granted to all users within a role
     /// </summary>
     [Table("AspNetRoleClaims")]
+    [NotMapped]
     public class RoleClaim: Entity
     {
         #region Fields

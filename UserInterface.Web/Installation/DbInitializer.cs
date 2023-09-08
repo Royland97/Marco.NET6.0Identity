@@ -1,15 +1,28 @@
-﻿using Core.Domain.Users;
+﻿using Core.DataAccess.IRepository.Users;
+using Core.Domain.Users;
+using Infrastructure.DataAccess.EntityFrameworkCore;
 
-namespace Infrastructure.DataAccess.EntityFrameworkCore
+namespace UserInterface.Web.Installation
 {
     /// <summary>
     /// Initialize Db and Populate it with data
     /// </summary>
     public class DbInitializer
     {
+        private readonly InstallResources _installResources;
+        private readonly IResourceRepository _resourceRepository;
+
+        public DbInitializer(InstallResources installResources, IResourceRepository resourceRepository)
+        {
+            _installResources = installResources;
+            _resourceRepository = resourceRepository;
+        }
+
         public static void Initialize(ApplicationDbContext applicationDbContext)
         {
             applicationDbContext.Database.EnsureCreated();
+
+            //await _installResources.InstallAsync();
 
             //Role
             var adminRole = new Role
@@ -18,8 +31,9 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
                 IsSystemRole = true,
                 Name = Role.Administrator,
                 NormalizedName = Role.Administrator.ToUpper(),
-                Description = $"Role para el usuario {Role.Administrator}."
+                Description = $"Role for the {Role.Administrator} user."
             };
+
             applicationDbContext.Roles.Add(adminRole);
 
             applicationDbContext.SaveChanges();
@@ -28,21 +42,17 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
 
             var adminUser = new User
             {
-                UserGuid = Guid.NewGuid(),
                 FirstName = "Admin",
                 LastName = "Admin",
                 UserName = "admin",
-                NormalizedUserName = "admin".ToUpper(),
                 Email = "admin@test.cu",
-                NormalizedEmail = "admin@test.cu".ToUpper(),
-                EmailConfirmed = true,
                 PhoneNumber = "1231244234",
-                PhoneNumberConfirmed = true,
                 Active = true
             };
 
-            applicationDbContext.Users.Add(adminUser);
+            adminUser.Roles.Add(adminRole);
 
+            applicationDbContext.Users.Add(adminUser);
             applicationDbContext.SaveChanges();
         }
     }

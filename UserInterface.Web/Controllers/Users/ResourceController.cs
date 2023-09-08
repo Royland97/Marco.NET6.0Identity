@@ -37,9 +37,6 @@ namespace UserInterface.Web.Controllers.Users
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             cancellationToken.ThrowIfCancellationRequested();
 
             try

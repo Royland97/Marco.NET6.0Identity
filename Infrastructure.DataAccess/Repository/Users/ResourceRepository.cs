@@ -25,15 +25,22 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// Saves a new Resource
         /// </summary>
         /// <param name="resource"></param>
-        /// <param name="cancellationToken"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task SaveResourceAsync(Resource resource, CancellationToken cancellationToken)
+        public async Task SaveResourceAsync(Resource resource)
         {
-            if (resource == null)
-                throw new ArgumentNullException();
+            await context.Resources.AddAsync(resource);
+            await context.SaveChangesAsync();
+        }
 
-            await context.Resources.AddAsync(resource, cancellationToken);
-            await context.SaveChangesAsync(cancellationToken);
+        /// <summary>
+        /// Saves a List of Resources
+        /// </summary>
+        /// <param name="resources"></param>
+        /// <returns></returns>
+        public async Task SaveAllResourcesAsync(List<Resource> resources)
+        {
+            foreach (Resource resource in resources)
+                await SaveResourceAsync(resource);
         }
 
         /// <summary>
@@ -44,9 +51,6 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <exception cref="ArgumentNullException"></exception>
         public async Task UpdateResourceAsync(Resource resource, CancellationToken cancellationToken)
         {
-            if (resource == null)
-                throw new ArgumentNullException();
-
             context.Entry(resource).State = EntityState.Modified;
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -74,16 +78,24 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <returns></returns>
         public async Task<Resource> GetResourceByIdAsync(int id, CancellationToken cancellationToken)
         {
-            if (id < 0)
-                throw new ArgumentNullException();
+            return await context.Resources.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        }
 
-            return await context.Resources.SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+        /// <summary>
+        /// Gets all Resources
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Resource>> GetAllResourcesAsync(CancellationToken cancellationToken)
+        {
+            return await context.Resources.ToListAsync(cancellationToken);
         }
 
         /// <summary>
         /// Gets All Resources by their Ids
         /// </summary>
         /// <param name="ids"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public async Task<List<Resource>> GetAllResourceByIdsAsync(List<int> ids, CancellationToken cancellationToken) 
         { 
@@ -97,16 +109,6 @@ namespace Infrastructure.DataAccess.Repository.Users
             }
 
             return resources;
-        }
-
-        /// <summary>
-        /// Gets all Resources
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task<IEnumerable<Resource>> GetAllResourcesAsync(CancellationToken cancellationToken)
-        {
-            return await context.Resources.ToListAsync(cancellationToken);
         }
 
     }

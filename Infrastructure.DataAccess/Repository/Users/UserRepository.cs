@@ -29,11 +29,6 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <exception cref="ArgumentNullException"></exception>
         public async Task SaveUserAsync(User user, CancellationToken cancellationToken)
         {
-            if(user == null)
-                throw new ArgumentNullException();
-
-            user.UserGuid = Guid.NewGuid();
-
             await context.Users.AddAsync(user, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -46,9 +41,6 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <exception cref="ArgumentNullException"></exception>
         public async Task UpdateUserAsync(User user, CancellationToken cancellationToken)
         {
-            if (user == null)
-                throw new ArgumentNullException();
-
             context.Entry(user).State = EntityState.Modified;
             await context.SaveChangesAsync(cancellationToken);
         }
@@ -76,10 +68,8 @@ namespace Infrastructure.DataAccess.Repository.Users
         /// <returns></returns>
         public async Task<User> GetUserByIdAsync(int id, CancellationToken cancellationToken)
         {
-            if(id < 0)
-                throw new ArgumentNullException();
-
-            return await context.Users.SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+            //return await context.Users.SingleOrDefaultAsync(u => u.Id == id, cancellationToken);
+            return await context.Users.FindAsync(id, cancellationToken);
         }
 
         /// <summary>
@@ -91,6 +81,22 @@ namespace Infrastructure.DataAccess.Repository.Users
         {
             return await context.Users.ToListAsync(cancellationToken);
         }
+
+        /// <summary>
+        /// Gets an User by it's name.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public async Task<User> GetUserByNameAsync(string name)
+        {
+            return await context.Users.FirstOrDefaultAsync(u => u.UserName.Equals(name));
+        }
+
+        #region Roles
+
+
+
+        #endregion
 
     }
 }

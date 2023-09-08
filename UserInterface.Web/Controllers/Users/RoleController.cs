@@ -55,11 +55,11 @@ namespace UserInterface.Web.Controllers.Users
             try
             {
                 var role = _mapper.Map<Role>(roleModel);
-                /*
-                var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds);
+                
+                var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds, cancellationToken);
 
                 foreach (var resource in resources)
-                    role.Resources.Add(resource);*/
+                    role.Resources.Add(resource);
 
                 await _roleRepository.SaveRoleAsync(role, cancellationToken);
 
@@ -94,12 +94,12 @@ namespace UserInterface.Web.Controllers.Users
             try
             {
                 var role = _mapper.Map<Role>(roleModel);
-                /*
-                var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds);
+                
+                var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds, cancellationToken);
 
                 role.Resources.Clear();
                 foreach (var resource in resources)
-                    role.Resources.Add(resource);*/
+                    role.Resources.Add(resource);
 
                 await _roleRepository.UpdateRoleAsync(role, cancellationToken);
 
@@ -130,16 +130,15 @@ namespace UserInterface.Web.Controllers.Users
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var roleDto = await _roleRepository.GetRoleByIdAsync(id, cancellationToken);
+            var role = await _roleRepository.GetRoleByIdAsync(id, cancellationToken);
 
-            if (roleDto == null)
+            if (role == null)
                 return NotFound(id);
 
             try
             {
                 await _roleRepository.DeleteRoleAsync(id, cancellationToken);
-
-                return Ok();
+                return Ok(id);
             }
             catch (Exception ex)
             {
@@ -159,9 +158,6 @@ namespace UserInterface.Web.Controllers.Users
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             cancellationToken.ThrowIfCancellationRequested();
 
             try

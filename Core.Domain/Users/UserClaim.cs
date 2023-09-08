@@ -6,6 +6,7 @@ namespace Core.Domain.Users
     /// Associate a Claim to a User
     /// </summary>
     [Table("AspNetUserClaims")]
+    [NotMapped]
     public class UserClaim: Entity
     {
         #region Fields

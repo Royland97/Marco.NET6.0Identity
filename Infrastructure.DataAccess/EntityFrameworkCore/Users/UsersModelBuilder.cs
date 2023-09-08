@@ -1,12 +1,12 @@
 ﻿using Core.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.DataAccess.EntityFrameworkCore.Identity
+namespace Infrastructure.DataAccess.EntityFrameworkCore.Users
 {
     /// <summary>
-    /// Identity Model Configuration
+    /// Users Model Configuration
     /// </summary>
-    public class IdentityModelBuilder
+    public class UsersModelBuilder
     {
         public void Configure(ModelBuilder modelBuilder)
         {
@@ -15,13 +15,8 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore.Identity
             {
                 b.HasKey(u => u.Id);
 
-                b.HasIndex(u => u.NormalizedUserName).IsUnique();
-                b.HasIndex(u => u.NormalizedEmail);
-
-                b.Property(u => u.UserName).HasMaxLength(256);
-                b.Property(u => u.NormalizedUserName).HasMaxLength(256);
+                b.Property(u => u.UserName).HasMaxLength(256).IsRequired();
                 b.Property(u => u.Email).HasMaxLength(256);
-                b.Property(u => u.NormalizedEmail).HasMaxLength(256);
 
                 b.HasMany(u => u.UserClaims);
                 b.HasMany(u => u.UserLogins);

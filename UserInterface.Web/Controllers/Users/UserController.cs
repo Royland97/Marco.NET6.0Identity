@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Core.DataAccess.IRepository.Users;
 using Core.Domain.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UserInterface.Web.Authorization;
 using UserInterface.Web.ViewModels.Users;
 
 namespace UserInterface.Web.Controllers.Users
@@ -15,6 +17,7 @@ namespace UserInterface.Web.Controllers.Users
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserController"/> class.
@@ -22,14 +25,17 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="userRepository"></param>
         /// <param name="roleRepository"></param>
         /// <param name="mapper"></param>
+        /// <param name="authorizationService"></param>
         public UserController(
             IUserRepository userRepository,
             IRoleRepository roleRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IAuthorizationService authorizationService)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
             _mapper = mapper;
+            _authorizationService = authorizationService;
         }
 
         /// <summary>
@@ -130,15 +136,15 @@ namespace UserInterface.Web.Controllers.Users
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var userDto = await _userRepository.GetUserByIdAsync(id, cancellationToken);
+            var user = await _userRepository.GetUserByIdAsync(id, cancellationToken);
 
-            if (userDto == null)
+            if (user == null)
                 return NotFound(id);
 
             try
             {
                 await _userRepository.DeleteUserAsync(id, cancellationToken);
-                return Ok();
+                return Ok(id);
             }
             catch (Exception ex)
             {
@@ -158,8 +164,10 @@ namespace UserInterface.Web.Controllers.Users
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var authorize = await _authorizationService.AuthorizeAsync(User, ResourcesNames.GetAllUsers, "ResourceAuthorize");
+
+            if (!authorize.Succeeded)
+                return Unauthorized();
 
             cancellationToken.ThrowIfCancellationRequested();
 

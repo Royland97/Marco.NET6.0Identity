@@ -10,9 +10,7 @@ namespace UserInterface.Web.ViewModels.Users
         public UsersProfile()
         {
             //User
-            CreateMap<UserModel, User>()
-                .ForMember(dst => dst.NormalizedEmail, opt => opt.MapFrom(src => src.Email.ToUpper()))
-                .ForMember(dst => dst.NormalizedUserName, opt => opt.MapFrom(src => src.UserName.ToUpper()));
+            CreateMap<UserModel, User>();
             CreateMap<User, UserModel>();
             CreateMap<User, UserModelList>();
 

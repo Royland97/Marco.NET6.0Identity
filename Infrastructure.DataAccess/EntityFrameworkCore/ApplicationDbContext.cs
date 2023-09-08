@@ -1,5 +1,5 @@
 ﻿using Core.Domain.Users;
-using Infrastructure.DataAccess.EntityFrameworkCore.Identity;
+using Infrastructure.DataAccess.EntityFrameworkCore.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.DataAccess.EntityFrameworkCore
@@ -28,7 +28,7 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
         {
             base.OnModelCreating(modelBuilder);
 
-            new IdentityModelBuilder().Configure(modelBuilder);
+            new UsersModelBuilder().Configure(modelBuilder);
         }
 
         #endregion
