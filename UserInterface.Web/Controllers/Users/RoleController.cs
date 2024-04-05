@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Core.DataAccess.IRepository.Users;
 using Core.Domain.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserInterface.Web.ViewModels.Users;
 
@@ -12,21 +13,18 @@ namespace UserInterface.Web.Controllers.Users
     [Route("/roles")]
     public class RoleController : Controller
     {
+        private readonly RoleManager<Role> _roleManager;
         private readonly IRoleRepository _roleRepository;
         private readonly IResourceRepository _resourceRepository;
         private readonly IMapper _mapper;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleController"/> class.
-        /// </summary>
-        /// <param name="roleRepository"></param>
-        /// <param name="resourceRepository"></param>
-        /// <param name="mapper"></param>
         public RoleController(
+            RoleManager<Role> roleManager,
             IRoleRepository roleRepository,
             IResourceRepository resourceRepository,
             IMapper mapper)
         {
+            _roleManager = roleManager;
             _roleRepository = roleRepository;
             _resourceRepository = resourceRepository;
             _mapper = mapper;
@@ -39,8 +37,6 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// <response code="201">Role created successfully</response>
-        /// <response code="400">Bad request, invalid role data</response>
         [HttpPost]
         [ProducesResponseType(typeof(RoleModel), StatusCodes.Status201Created)]
         public async Task<IActionResult> Save(
@@ -52,23 +48,21 @@ namespace UserInterface.Web.Controllers.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
+            var role = _mapper.Map<Role>(roleModel);
+
+            if (!roleModel.ResourcesIds.Any())
             {
-                var role = _mapper.Map<Role>(roleModel);
-                
-                var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds, cancellationToken);
+                var resources = await _resourceRepository.GetAllByIdsAsync(roleModel.ResourcesIds, cancellationToken);
 
                 foreach (var resource in resources)
                     role.Resources.Add(resource);
-
-                await _roleRepository.SaveRoleAsync(role, cancellationToken);
-
-                return Ok(roleModel);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+
+            var result = await _roleManager.CreateAsync(role);
+
+            return result.Succeeded
+                ? StatusCode(StatusCodes.Status201Created, roleModel)
+                : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
         }
 
         /// <summary>
@@ -95,13 +89,13 @@ namespace UserInterface.Web.Controllers.Users
             {
                 var role = _mapper.Map<Role>(roleModel);
                 
-                var resources = await _resourceRepository.GetAllResourceByIdsAsync(roleModel.ResourcesIds, cancellationToken);
+                var resources = await _resourceRepository.GetAllByIdsAsync(roleModel.ResourcesIds, cancellationToken);
 
                 role.Resources.Clear();
                 foreach (var resource in resources)
                     role.Resources.Add(resource);
 
-                await _roleRepository.UpdateRoleAsync(role, cancellationToken);
+                await _roleManager.UpdateAsync(role);
 
                 return Ok(roleModel);
             }
@@ -122,22 +116,22 @@ namespace UserInterface.Web.Controllers.Users
         /// 
         /// <response code="200">Role deleted successfully</response>
         /// <response code="404">Role not found with the provided Id</response>
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(
-            [FromRoute] int id,
+            [FromRoute] string id,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var role = await _roleRepository.GetRoleByIdAsync(id, cancellationToken);
+            var role = await _roleManager.FindByIdAsync(id);
 
             if (role == null)
                 return NotFound(id);
 
             try
             {
-                await _roleRepository.DeleteRoleAsync(id, cancellationToken);
+                await _roleManager.DeleteAsync(role);
                 return Ok(id);
             }
             catch (Exception ex)
@@ -162,7 +156,7 @@ namespace UserInterface.Web.Controllers.Users
 
             try
             {
-                var result = await _roleRepository.GetAllRolesAsync(cancellationToken);
+                var result = await _roleRepository.GetAllAsync(cancellationToken);
                 var roles = _mapper.Map<List<RoleModelList>>(result);
 
                 return Ok(roles);
@@ -192,7 +186,7 @@ namespace UserInterface.Web.Controllers.Users
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var role = await _roleRepository.GetRoleByIdAsync(id, cancellationToken);
+            var role = await _roleRepository.GetByIdAsync(id, cancellationToken);
 
             if (role == null)
                 return NotFound(id);

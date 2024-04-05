@@ -1,4 +1,5 @@
 ﻿using Core.Domain.Users;
+using UserInterface.Web.ViewModels.Authentication;
 
 namespace UserInterface.Web.ViewModels.Users
 {
@@ -13,6 +14,7 @@ namespace UserInterface.Web.ViewModels.Users
             CreateMap<UserModel, User>();
             CreateMap<User, UserModel>();
             CreateMap<User, UserModelList>();
+            CreateMap<RegisterModel, User>();
 
             //Role
             CreateMap<RoleModel, Role>()

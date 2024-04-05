@@ -1,7 +1,7 @@
 ﻿using Core.DataAccess.IRepository.Users;
 using Core.Domain.Users;
 using Microsoft.AspNetCore.Authorization;
-
+/*
 namespace UserInterface.Web.Authorization
 {
     /// <summary>
@@ -28,4 +28,4 @@ namespace UserInterface.Web.Authorization
             }
         }
     }
-}
+}*/

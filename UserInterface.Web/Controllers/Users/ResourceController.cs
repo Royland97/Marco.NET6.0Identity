@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿/*using AutoMapper;
 using Core.DataAccess.IRepository.Users;
 using Microsoft.AspNetCore.Mvc;
 using UserInterface.Web.ViewModels.Users;
@@ -53,3 +53,4 @@ namespace UserInterface.Web.Controllers.Users
         }
     }
 }
+*/

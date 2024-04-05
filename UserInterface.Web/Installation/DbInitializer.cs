@@ -21,36 +21,20 @@ namespace UserInterface.Web.Installation
         public static void Initialize(ApplicationDbContext applicationDbContext)
         {
             applicationDbContext.Database.EnsureCreated();
-
-            //await _installResources.InstallAsync();
-
-            //Role
-            var adminRole = new Role
-            {
-                Active = true,
-                IsSystemRole = true,
-                Name = Role.Administrator,
-                NormalizedName = Role.Administrator.ToUpper(),
-                Description = $"Role for the {Role.Administrator} user."
-            };
-
-            applicationDbContext.Roles.Add(adminRole);
-
-            applicationDbContext.SaveChanges();
-
+            
+            //_installResources.InstallAsync();
+            
             //User
-
+            var adminRole = applicationDbContext.Roles.Find("Admin");
             var adminUser = new User
             {
-                FirstName = "Admin",
-                LastName = "Admin",
                 UserName = "admin",
                 Email = "admin@test.cu",
                 PhoneNumber = "1231244234",
                 Active = true
             };
 
-            adminUser.Roles.Add(adminRole);
+            applicationDbContext.UserRoles.Add(new UserRole { User = adminUser, Role = adminRole});
 
             applicationDbContext.Users.Add(adminUser);
             applicationDbContext.SaveChanges();

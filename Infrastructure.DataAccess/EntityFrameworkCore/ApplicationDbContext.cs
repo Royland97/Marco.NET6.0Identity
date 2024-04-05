@@ -1,5 +1,7 @@
 ﻿using Core.Domain.Users;
 using Infrastructure.DataAccess.EntityFrameworkCore.Users;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.DataAccess.EntityFrameworkCore
@@ -7,7 +9,8 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
     /// <summary>
     /// Application DbContext
     /// </summary>
-    public class ApplicationDbContext: DbContext
+    public class ApplicationDbContext: IdentityDbContext<User,Role, string, UserClaim,UserRole, 
+                                                         UserLogin, RoleClaim, UserToken>
     {
         #region Constructor
 
@@ -15,13 +18,9 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
             : base(options)
         {
         }
-
-        public DbSet<User> Users { get; set; } 
-        public DbSet<UserClaim> Claims { get; set; }
-        public DbSet<UserLogin> Logins { get; set; }
-        public DbSet<UserToken> Tokens { get; set; }
+        
+        public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<RoleClaim> RoleClaims { get; set; }
         public DbSet<Resource> Resources { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -29,6 +28,15 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
             base.OnModelCreating(modelBuilder);
 
             new UsersModelBuilder().Configure(modelBuilder);
+            SeedRoles(modelBuilder);
+        }
+        
+        private static void SeedRoles(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Role>().HasData(
+                    new Role() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN", Active = true, Description = "Role for the admin user" },
+                    new Role() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER", Active = true, Description = "Role for the system user" }
+                );
         }
 
         #endregion

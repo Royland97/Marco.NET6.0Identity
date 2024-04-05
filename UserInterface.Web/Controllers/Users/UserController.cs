@@ -2,6 +2,7 @@
 using Core.DataAccess.IRepository.Users;
 using Core.Domain.Users;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UserInterface.Web.Authorization;
 using UserInterface.Web.ViewModels.Users;
@@ -12,30 +13,27 @@ namespace UserInterface.Web.Controllers.Users
     /// User Api Controller
     /// </summary>
     [Route("/users")]
+    [ApiController]
     public class UserController : Controller
     {
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
         private readonly IUserRepository _userRepository;
-        private readonly IRoleRepository _roleRepository;
         private readonly IMapper _mapper;
         private readonly IAuthorizationService _authorizationService;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UserController"/> class.
-        /// </summary>
-        /// <param name="userRepository"></param>
-        /// <param name="roleRepository"></param>
-        /// <param name="mapper"></param>
-        /// <param name="authorizationService"></param>
         public UserController(
-            IUserRepository userRepository,
-            IRoleRepository roleRepository,
+            UserManager<User> userManager,
+            RoleManager<Role> roleManager,
             IMapper mapper,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            IUserRepository userRepository)
         {
-            _userRepository = userRepository;
-            _roleRepository = roleRepository;
+            _userManager = userManager;
+            _roleManager = roleManager;
             _mapper = mapper;
             _authorizationService = authorizationService;
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -45,11 +43,9 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// <response code="201">User created successfully</response>
-        /// <response code="400">Bad request, invalid user data</response>
         [HttpPost]
         [ProducesResponseType(typeof(UserModel), StatusCodes.Status201Created)]
-        public async Task<IActionResult> Save(
+        public async Task<IActionResult> Register(
             [FromBody] UserModel userModel,
             CancellationToken cancellationToken = default)
         {
@@ -58,23 +54,18 @@ namespace UserInterface.Web.Controllers.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
-            {
-                var user = _mapper.Map<User>(userModel);
+            var userExists = await _userManager.FindByEmailAsync(userModel.Email);
+            if (userExists != null)
+                return StatusCode(StatusCodes.Status403Forbidden, "The User already exists");
 
-                var roles = await _roleRepository.GetAllRoleByIdsAsync(userModel.RoleIds, cancellationToken);
+            var user = _mapper.Map<User>(userModel);
+            user.SecurityStamp = Guid.NewGuid().ToString();
 
-                foreach (var role in roles)
-                    user.Roles.Add(role);
+            var result = await _userManager.CreateAsync(user, userModel.Password);
 
-                await _userRepository.SaveUserAsync(user, cancellationToken);
-
-                return Ok(userModel);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return result.Succeeded
+                ? StatusCode(StatusCodes.Status201Created, userModel)
+                : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
         }
 
         /// <summary>
@@ -84,8 +75,6 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// <response code="200">User updated successfully</response>
-        /// <response code="400">Bad request, invalid user data</response>
         [HttpPut]
         [ProducesResponseType(typeof(UserModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> Update(
@@ -97,24 +86,14 @@ namespace UserInterface.Web.Controllers.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
-            {
-                var user = _mapper.Map<User>(userModel);
+            var user = _mapper.Map<User>(userModel);
+            user.SecurityStamp = Guid.NewGuid().ToString();
 
-                var roles = await _roleRepository.GetAllRoleByIdsAsync(userModel.RoleIds, cancellationToken);
+            var result = await _userManager.UpdateAsync(user);
 
-                user.Roles.Clear();
-                foreach (var role in roles)
-                    user.Roles.Add(role);
-
-                await _userRepository.UpdateUserAsync(user, cancellationToken);
-
-                return Ok(userModel);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return result.Succeeded
+                ? StatusCode(StatusCodes.Status201Created, userModel)
+                : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
         }
 
         /// <summary>
@@ -125,25 +104,22 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// 
-        /// <response code="200">User deleted successfully</response>
-        /// <response code="404">User not found with the provided Id</response>
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(
-            [FromRoute] int id,
+            [FromRoute] string id,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var user = await _userRepository.GetUserByIdAsync(id, cancellationToken);
+            var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
                 return NotFound(id);
 
             try
             {
-                await _userRepository.DeleteUserAsync(id, cancellationToken);
+                await _userManager.DeleteAsync(user);
                 return Ok(id);
             }
             catch (Exception ex)
@@ -158,7 +134,6 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// <response code="200">User found with the provided search options</response>
         [HttpGet]
         [ProducesResponseType(typeof(List<UserModelList>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
@@ -171,17 +146,10 @@ namespace UserInterface.Web.Controllers.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
-            {
-                var result = await _userRepository.GetAllUsersAsync(cancellationToken);
-                var resources =  _mapper.Map<List<UserModelList>>(result);
+            var result = await _userRepository.GetAllAsync(cancellationToken);
+            var users = _mapper.Map<List<UserModelList>>(result);
 
-                return Ok(resources);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(users);
         }
 
         /// <summary>
@@ -192,18 +160,15 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// 
-        /// <response code="200">User data</response>
-        /// <response code="404">User not found with the provided ID</response>
-        [HttpGet("{id:int}")]
+        [HttpGet("{id}")]
         [ProducesResponseType(typeof(UserModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetById(
-            [FromRoute] int id,
+            [FromRoute] string id,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var user = await _userRepository.GetUserByIdAsync(id, cancellationToken);
+            var user = await _userManager.FindByIdAsync(id);
 
             if (user == null)
                 return NotFound(id);

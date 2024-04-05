@@ -11,68 +11,32 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore.Users
         public void Configure(ModelBuilder modelBuilder)
         {
             //User
-            modelBuilder.Entity<User>(b =>
+            modelBuilder.Entity<User>(b => 
             {
-                b.HasKey(u => u.Id);
-
-                b.Property(u => u.UserName).HasMaxLength(256).IsRequired();
-                b.Property(u => u.Email).HasMaxLength(256);
-
-                b.HasMany(u => u.UserClaims);
-                b.HasMany(u => u.UserLogins);
-                b.HasMany(u => u.UserTokens);
-                b.HasMany(u => u.Roles).WithMany(r => r.Users).UsingEntity("AspNetUserRoles");
-
-                /*b.HasMany(u => u.UserClaims).WithOne(uc => uc.User).HasForeignKey("UserId").IsRequired();
-                b.HasMany(u => u.UserLogins).WithOne(ul => ul.User).HasForeignKey("UserId").IsRequired();
-                b.HasMany(u => u.UserTokens).WithOne(ut => ut.User).HasForeignKey("UserId").IsRequired();*/
+                b.HasMany(u => u.Claims).WithOne(uc => uc.User).HasForeignKey(uc => uc.UserId).IsRequired();
+                b.HasMany(u => u.Logins).WithOne(ul => ul.User).HasForeignKey(uc => uc.UserId).IsRequired();
+                b.HasMany(u => u.Tokens).WithOne(ut => ut.User).HasForeignKey(uc => uc.UserId).IsRequired();
+                b.HasMany(u => u.UserRoles).WithOne(ur => ur.User).HasForeignKey(ur => ur.UserId).IsRequired();
             });
-
-            modelBuilder.Entity<UserClaim>(b =>
-            {
-                b.HasKey(uc => uc.Id);
-            });
-
-            modelBuilder.Entity<UserLogin>(b =>
-            {
-                b.HasKey(ul => new { ul.LoginProvider, ul.ProviderKey });
-
-                b.Property(ul => ul.LoginProvider).HasMaxLength(128);
-                b.Property(ul => ul.ProviderKey).HasMaxLength(128);
-            });
-
-            modelBuilder.Entity<UserToken>(b =>
-            {
-                b.HasKey(ut => new { ut.LoginProvider, ut.Name });
-
-                b.Property(ut => ut.LoginProvider).HasMaxLength(256);
-                b.Property(ut => ut.Name).HasMaxLength(256);
-            });
-
+            
             //Role
             modelBuilder.Entity<Role>(b =>
             {
-                b.HasKey(r => r.Id);
-
-                b.HasIndex(r => r.NormalizedName).IsUnique();
-
-                b.Property(r => r.Name).HasMaxLength(256);
-                b.Property(r => r.NormalizedName).HasMaxLength(256);
-
-                b.HasMany(r => r.Resources).WithMany(r => r.Roles).UsingEntity("AspNetResourceRoles");
-                b.HasMany(r => r.RoleClaims);
+                b.HasMany(r => r.RoleClaims).WithOne(rc => rc.Role).HasForeignKey(rc => rc.RoleId).IsRequired();
+                b.HasMany(r => r.UserRoles).WithOne(ur => ur.Role).HasForeignKey(ur => ur.RoleId).IsRequired();
             });
-
-            modelBuilder.Entity<RoleClaim>(b =>
-            {
-                b.HasKey(rc => rc.Id);
-            });
-
+            
             //Resource
             modelBuilder.Entity<Resource>(b =>
             {
-                b.HasKey(r => r.Id);
+                b.HasKey(r => r.Id).HasName("PK_AspNetResources");
+                
+                b.Property(r => r.Name).HasMaxLength(256);
+                b.Property(r => r.Description).HasMaxLength(256);
+
+                b.HasMany(r => r.Roles).WithMany(r => r.Resources).UsingEntity("AspNetRoleResource");
             });
+
         }
     }
 }

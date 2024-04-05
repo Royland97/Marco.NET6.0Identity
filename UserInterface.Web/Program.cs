@@ -1,12 +1,14 @@
 using Microsoft.Extensions.FileProviders;
-using Infrastructure.DataAccess.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using UserInterface.Web.ViewModels;
+using UserInterface.Web.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Core.DataAccess.IRepository.Users;
 using Infrastructure.DataAccess.Repository.Users;
-using UserInterface.Web.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using UserInterface.Web.Authorization;
 using UserInterface.Web.Installation;
+using Infrastructure.DataAccess.EntityFrameworkCore;
+using Core.Domain.Users;
 
 namespace UserInterface.Web
 {
@@ -40,12 +42,42 @@ namespace UserInterface.Web
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer")));
 
             //Authentication and Authorization
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            });
+
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("ResourceAuthorize", policy => policy.Requirements.Add(new ResourceAuthorizationRequirement()));
             });
 
             //Identity
+            builder.Services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                // Password settings.
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 5;
+                options.Password.RequiredUniqueChars = 1;
+
+                // Lockout settings.
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+                // User settings.
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+                options.User.RequireUniqueEmail = false;
+            });
 
             //CORS
             builder.Services.AddCors(options =>
@@ -62,20 +94,20 @@ namespace UserInterface.Web
 
             builder.Services.AddAutoMapper(typeof(BaseProfile));
 
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllers();
 
             //Dependencies
             builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
             builder.Services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
             builder.Services.AddScoped(typeof(IResourceRepository), typeof(ResourceRepository));
-            builder.Services.AddScoped(typeof(IAuthorizationHandler), typeof(ResourceAuthorizationHandler));
+            //builder.Services.AddScoped(typeof(IAuthorizationHandler), typeof(ResourceAuthorizationHandler));
 
             #endregion
 
             #region Middleware
 
             var app = builder.Build();
-
+            
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;

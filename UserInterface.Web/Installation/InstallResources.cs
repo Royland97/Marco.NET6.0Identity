@@ -25,7 +25,7 @@ namespace UserInterface.Web.Installation
         /// Install the User's Resource in the application
         /// </summary>
         /// <returns></returns>
-        public async Task InstallUsersResources()
+        public async Task InstallUsersResources(CancellationToken cancellationToken = default(CancellationToken))
         {
             List<Resource> resources = new()
             {
@@ -56,7 +56,7 @@ namespace UserInterface.Web.Installation
                 }
             };
 
-            await _resourceRepository.SaveAllResourcesAsync(resources);
+            await _resourceRepository.SaveAllAsync(resources, cancellationToken);
         }
     }
 }

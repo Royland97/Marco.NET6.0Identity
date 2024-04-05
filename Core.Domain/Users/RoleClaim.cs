@@ -1,41 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Core.Domain.Users
 {
     /// <summary>
     /// Represents a Claim granted to all users within a role
     /// </summary>
-    [Table("AspNetRoleClaims")]
-    [NotMapped]
-    public class RoleClaim: Entity
+    public class RoleClaim: IdentityRoleClaim<string>
     {
-        #region Fields
-
-        /// <summary>
-        /// Gets or sets the role claim type.
-        /// </summary>
-        public string ClaimType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the role claim value.
-        /// </summary>
-        public string ClaimValue { get; set; }
-
-        /// <summary>
-        /// Gets or sets the role claim value type.
-        /// </summary>
-        public string ClaimValueType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the role claim issuer.
-        /// </summary>
-        public string ClaimIssuer { get; set; }
-
-        /// <summary>
-        /// Gets or sets the role than owns this claim.
-        /// </summary>
-        public Role Role { get; set; }
-
-        #endregion
+        public virtual Role Role { get; set; }
     }
 }

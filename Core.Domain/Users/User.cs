@@ -1,67 +1,43 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace Core.Domain.Users
 {
     /// <summary>
-    /// Represents an application user.
+    /// Represent an User Application
     /// </summary>
-    [Table("AspNetUsers")]
-    public class User: Entity
+    public class User: IdentityUser
     {
-        /// <summary>
-        /// Gets or sets the user first name.
-        /// </summary>
-        public string FirstName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user last name.
-        /// </summary>
-        public string LastName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user email.
-        /// </summary>
-        public string Email { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user name of this user.
-        /// </summary>
-        public string UserName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user phone number.
-        /// </summary>
-        public string PhoneNumber { get; set; }
+        #region Fields
 
         /// <summary>
         /// Define whether the user is active or not in the system.
         /// </summary>
         public bool Active { get; set; }
 
-        #region Roles
-
+        #region Relationships
+        
         /// <summary>
-        /// Gets the User's Roles
+        /// Gets the User's Claims 
         /// </summary>
-        public ICollection<Role> Roles { get; set; } = new List<Role>();
-
-        #endregion
-
+        public virtual ICollection<UserClaim> Claims { get; set; }
+        
         /// <summary>
         /// Gets the User's Logins
         /// </summary>
-        public ICollection<UserLogin> UserLogins { get; set; } = new List<UserLogin>();
+        public virtual ICollection<UserLogin> Logins { get; set; }
 
         /// <summary>
-        /// Gets the User's Claims
+        /// Get's the User's Authentication Tokens
         /// </summary>
-        public ICollection<UserClaim> UserClaims { get; set; } = new List<UserClaim>();
-
+        public virtual ICollection<UserToken> Tokens { get; set; }
+        
         /// <summary>
-        /// Gets the User's Authentication Tokens
+        /// Get's the User's Roles
         /// </summary>
-        public ICollection<UserToken> UserTokens { get; set; } = new List<UserToken>();
+        public virtual ICollection<UserRole> UserRoles { get; set; }
+        
+        #endregion
 
+        #endregion
     }
 }
