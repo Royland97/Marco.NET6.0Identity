@@ -4,14 +4,19 @@ namespace UserInterface.Web.ViewModels.Authentication
 {
     public class RegisterModel
     {
-        [Required(ErrorMessage = "User Name is required")]
+        [Required]
+        [DataType(DataType.Text)]
         public string UserName { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
+        [Required]
+        [DataType(DataType.Password)]
         public string Password { get; set; }
-        
+
+        [Required]
         [EmailAddress]
-        [Required(ErrorMessage = "Email is required")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
+
+        public bool Active { get; set; }
     }
 }

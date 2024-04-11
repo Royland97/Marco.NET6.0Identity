@@ -9,35 +9,34 @@ namespace UserInterface.Web.Installation
     /// </summary>
     public class DbInitializer
     {
-        private readonly InstallResources _installResources;
-        private readonly IResourceRepository _resourceRepository;
+        private readonly IInstallResources _installResources;
 
-        public DbInitializer(InstallResources installResources, IResourceRepository resourceRepository)
+        public DbInitializer(IInstallResources installResources)
         {
             _installResources = installResources;
-            _resourceRepository = resourceRepository;
         }
 
-        public static void Initialize(ApplicationDbContext applicationDbContext)
+        public async static Task Initialize(ApplicationDbContext applicationDbContext)
         {
-            applicationDbContext.Database.EnsureCreated();
-            
-            //_installResources.InstallAsync();
-            
-            //User
-            var adminRole = applicationDbContext.Roles.Find("Admin");
-            var adminUser = new User
+            if (await applicationDbContext.Database.EnsureCreatedAsync()) 
             {
-                UserName = "admin",
-                Email = "admin@test.cu",
-                PhoneNumber = "1231244234",
-                Active = true
-            };
+                //await _installResources.InstallAsync();
 
-            applicationDbContext.UserRoles.Add(new UserRole { User = adminUser, Role = adminRole});
+                //User
+                var adminRole = await applicationDbContext.Roles.FindAsync("Admin");
+                var adminUser = new User
+                {
+                    UserName = "admin",
+                    Email = "admin@test.cu",
+                    PhoneNumber = "1231244234",
+                    Active = true
+                };
 
-            applicationDbContext.Users.Add(adminUser);
-            applicationDbContext.SaveChanges();
+                await applicationDbContext.UserRoles.AddAsync(new UserRole { User = adminUser, Role = adminRole});
+
+                await applicationDbContext.Users.AddAsync(adminUser);
+                await applicationDbContext.SaveChangesAsync();
+            }
         }
     }
 }

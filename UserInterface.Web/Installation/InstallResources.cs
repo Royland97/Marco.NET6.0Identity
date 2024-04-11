@@ -7,7 +7,7 @@ namespace UserInterface.Web.Installation
     /// <summary>
     /// Install all Resources in the application
     /// </summary>
-    public class InstallResources   
+    public class InstallResources: IInstallResources
     {
         private readonly IResourceRepository _resourceRepository;
 

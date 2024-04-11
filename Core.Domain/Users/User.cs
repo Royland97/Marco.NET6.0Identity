@@ -3,36 +3,36 @@
 namespace Core.Domain.Users
 {
     /// <summary>
-    /// Represent an User Application
+    /// Represents an User Application
     /// </summary>
     public class User: IdentityUser
     {
         #region Fields
 
         /// <summary>
-        /// Define whether the user is active or not in the system.
+        /// Defines whether the user is active or not in the system.
         /// </summary>
         public bool Active { get; set; }
 
         #region Relationships
         
         /// <summary>
-        /// Gets the User's Claims 
+        /// Gets the User Claims 
         /// </summary>
         public virtual ICollection<UserClaim> Claims { get; set; }
         
         /// <summary>
-        /// Gets the User's Logins
+        /// Gets the User Logins
         /// </summary>
         public virtual ICollection<UserLogin> Logins { get; set; }
 
         /// <summary>
-        /// Get's the User's Authentication Tokens
+        /// Gets the User Authentication Tokens
         /// </summary>
         public virtual ICollection<UserToken> Tokens { get; set; }
         
         /// <summary>
-        /// Get's the User's Roles
+        /// Gets the User Roles
         /// </summary>
         public virtual ICollection<UserRole> UserRoles { get; set; }
         

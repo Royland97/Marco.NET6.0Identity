@@ -3,7 +3,7 @@
 namespace Core.Domain.Users
 {
     /// <summary>
-    /// Represent an User Claim
+    /// Represents an User Claim
     /// </summary>
     public class UserClaim: IdentityUserClaim<string>
     {

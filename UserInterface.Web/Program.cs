@@ -24,7 +24,7 @@ namespace UserInterface.Web
         /// </summary>
         /// 
         /// <param name="args">Command arguments to start the application</param>
-        public static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +39,7 @@ namespace UserInterface.Web
 
             //DBContext
             builder.Services.AddDbContext<ApplicationDbContext>(
-                options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer")));
+                options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web")));
 
             //Authentication and Authorization
             builder.Services.AddAuthentication(options =>
@@ -114,7 +114,7 @@ namespace UserInterface.Web
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                    DbInitializer.Initialize(context);
+                    await DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
                 {

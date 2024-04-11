@@ -3,7 +3,7 @@
 namespace Core.Domain.Users
 {
     /// <summary>
-    /// Represent the User authentication token
+    /// Represents the User authentication token
     /// </summary>
     public class UserToken: IdentityUserToken<string>
     {

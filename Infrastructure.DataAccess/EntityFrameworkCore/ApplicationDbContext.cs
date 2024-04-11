@@ -1,6 +1,5 @@
 ﻿using Core.Domain.Users;
 using Infrastructure.DataAccess.EntityFrameworkCore.Users;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

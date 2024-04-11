@@ -12,13 +12,13 @@ namespace Core.Domain.Users
         #region Fields
 
         /// <summary>
-        /// Gets or sets the resource name.
+        /// Resource name.
         /// </summary>
         [Required]
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the resource description.
+        /// Resource description.
         /// </summary>
         [Required]
         public string Description { get; set; }
@@ -26,7 +26,7 @@ namespace Core.Domain.Users
         #region Relationships
 
         /// <summary>
-        /// Gets the Resource's Roles
+        /// Gets the Resource Roles
         /// </summary>
         public virtual ICollection<Role> Roles { get; set; }
 

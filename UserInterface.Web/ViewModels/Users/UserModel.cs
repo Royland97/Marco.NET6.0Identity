@@ -7,20 +7,28 @@ namespace UserInterface.Web.ViewModels.Users
     /// </summary>
     public class UserModel
     {
+        [Required]
+        [DataType(DataType.Text)]
         public string Id { get; set; }
 
-        [Required(ErrorMessage = "Email is required")]
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "UserName is required")]
+        [Required]
+        [DataType(DataType.Text)]
         public string UserName { get; set; }
 
-        [Required(ErrorMessage = "Password is required")]
+        [Required]
+        [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public bool Active { get; set; }
+        [Phone]
+        [DataType(DataType.PhoneNumber)]
+        public string PhoneNumber { get; set; }
 
-        public List<int> RolesIds { get; set; }
+        public bool Active { get; set; }
 
     }
 

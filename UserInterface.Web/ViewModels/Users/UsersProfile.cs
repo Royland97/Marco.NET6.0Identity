@@ -12,8 +12,10 @@ namespace UserInterface.Web.ViewModels.Users
         {
             //User
             CreateMap<UserModel, User>();
-            CreateMap<User, UserModel>();
-            CreateMap<User, UserModelList>();
+            CreateMap<User, UserModel>()
+                .ForMember(dst => dst.Password, opt => opt.MapFrom(src => src.PasswordHash));
+            CreateMap<User, UserModelList>()
+                .ForMember(dst => dst.Password, opt => opt.MapFrom(src => src.PasswordHash));
             CreateMap<RegisterModel, User>();
 
             //Role

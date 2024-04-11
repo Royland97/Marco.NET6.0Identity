@@ -49,27 +49,27 @@
         Task DeleteAllAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Deletes an entity by it's Id
+        /// Deletes an entity by Id
         /// </summary>
-        /// <param name="id">The Id of the entity to be deleted</param>
+        /// <param name="id">Entity Id to be deleted</param>
         /// <param name="cancellationToken"></param>
         /// <exception cref="OperationCanceledException"></exception>
-        Task DeleteByIdAsync(int id, CancellationToken cancellationToken);
+        Task DeleteByIdAsync(string id, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets an Entity by it's Id
+        /// Gets an Entity by Id
         /// </summary>
-        /// <param name="id">The id of the entity to be found</param>
+        /// <param name="id">Entity Id to be found</param>
         /// <param name="cancellationToken"></param>
-        Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken);
+        Task<TEntity> GetByIdAsync(string id, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets all Entities by a list of Id's 
+        /// Gets all Entities by Id List
         /// </summary>
-        /// <param name="ids"></param>
+        /// <param name="ids">Id List</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
+        Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets all Entities

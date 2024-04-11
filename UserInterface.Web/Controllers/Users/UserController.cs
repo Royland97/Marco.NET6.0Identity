@@ -4,7 +4,9 @@ using Core.Domain.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using UserInterface.Web.Authorization;
+using UserInterface.Web.ViewModels.Authentication;
 using UserInterface.Web.ViewModels.Users;
 
 namespace UserInterface.Web.Controllers.Users
@@ -21,32 +23,34 @@ namespace UserInterface.Web.Controllers.Users
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IRoleRepository _roleRepository;
 
         public UserController(
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
             IAuthorizationService authorizationService,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IRoleRepository roleRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
             _authorizationService = authorizationService;
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
         }
 
         /// <summary>
         /// Saves an User
         /// </summary>
-        /// <param name="userModel">User data</param>
+        /// <param name="registerModel">User data</param>
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpPost]
-        [ProducesResponseType(typeof(UserModel), StatusCodes.Status201Created)]
         public async Task<IActionResult> Register(
-            [FromBody] UserModel userModel,
+            [FromBody] RegisterModel registerModel,
             CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
@@ -54,17 +58,17 @@ namespace UserInterface.Web.Controllers.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var userExists = await _userManager.FindByEmailAsync(userModel.Email);
+            var userExists = await _userManager.FindByEmailAsync(registerModel.Email);
             if (userExists != null)
                 return StatusCode(StatusCodes.Status403Forbidden, "The User already exists");
 
-            var user = _mapper.Map<User>(userModel);
-            user.SecurityStamp = Guid.NewGuid().ToString();
+            var user = _mapper.Map<User>(registerModel);
 
-            var result = await _userManager.CreateAsync(user, userModel.Password);
+            var result = await _userManager.CreateAsync(user, registerModel.Password);
+            await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Email, user.Email));
 
             return result.Succeeded
-                ? StatusCode(StatusCodes.Status201Created, userModel)
+                ? StatusCode(StatusCodes.Status201Created, registerModel)
                 : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
         }
 
@@ -76,7 +80,6 @@ namespace UserInterface.Web.Controllers.Users
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpPut]
-        [ProducesResponseType(typeof(UserModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> Update(
             [FromBody] UserModel userModel,
             CancellationToken cancellationToken = default)
@@ -86,26 +89,35 @@ namespace UserInterface.Web.Controllers.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var user = _mapper.Map<User>(userModel);
-            user.SecurityStamp = Guid.NewGuid().ToString();
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userModel.Id);
 
-            var result = await _userManager.UpdateAsync(user);
+                if (user == null)
+                    return NotFound(userModel.Id);
 
-            return result.Succeeded
-                ? StatusCode(StatusCodes.Status201Created, userModel)
-                : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
+                user = _mapper.Map(userModel, user);
+                var result = await _userManager.UpdateAsync(user);
+
+                return result.Succeeded
+                    ? StatusCode(StatusCodes.Status201Created, userModel)
+                    : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         /// <summary>
         /// Deletes an user.
         /// </summary>
         /// 
-        /// <param name="id">Id of the User to delete</param>
+        /// <param name="id">User Id to delete</param>
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(
             [FromRoute] string id,
             CancellationToken cancellationToken = default)
@@ -135,33 +147,31 @@ namespace UserInterface.Web.Controllers.Users
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpGet]
-        [ProducesResponseType(typeof(List<UserModelList>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
-        {
+        {/*
             var authorize = await _authorizationService.AuthorizeAsync(User, ResourcesNames.GetAllUsers, "ResourceAuthorize");
 
             if (!authorize.Succeeded)
-                return Unauthorized();
+                return Unauthorized();*/
 
             cancellationToken.ThrowIfCancellationRequested();
-
+            
             var result = await _userRepository.GetAllAsync(cancellationToken);
-            var users = _mapper.Map<List<UserModelList>>(result);
+            var users = _mapper.Map<ICollection<UserModelList>>(result);
 
             return Ok(users);
         }
 
         /// <summary>
-        /// Gets an User by it's id.
+        /// Gets an User by Id.
         /// </summary>
         /// 
-        /// <param name="id">Id of the User</param>
+        /// <param name="id">User Id</param>
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(UserModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetById(
             [FromRoute] string id,
             CancellationToken cancellationToken = default)
@@ -177,6 +187,118 @@ namespace UserInterface.Web.Controllers.Users
 
             return Ok(userModel);
         }
+
+        #region Roles
+
+        /// <summary>
+        /// Gets all User Roles by Id
+        /// </summary>
+        /// 
+        /// <param name="id">User Id</param>
+        /// <param name="cancellationToken">
+        /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
+        /// </param>
+        [HttpGet("{id}/roles")]
+        public async Task<IActionResult> GetRolesByUserId(
+            [FromRoute] string id,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound(id);
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Ok(roles);
+        }
+
+        /// <summary>
+        /// Add a Role List to User
+        /// </summary>
+        /// <param name="id">User Id</param>
+        /// <param name="rolesIds">Role List to add</param>
+        /// <param name="cancellationToken">
+        /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
+        /// </param>
+        [HttpPut("{id}/roles")]
+        public async Task<IActionResult> AddRolesToUser(
+            [FromRoute] string id,
+            [FromBody] List<string> rolesIds,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound(id);
+
+            if (rolesIds.Any())
+            {
+                var roles = await _roleRepository.GetAllByIdsAsync(rolesIds, cancellationToken);
+
+                try
+                {
+                    foreach (var role in roles)
+                        await _userManager.AddToRoleAsync(user, role.Name);
+
+                    return Ok(rolesIds);
+                }catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+            else
+            {
+                return BadRequest("The Role List contains any elements");
+            }
+        }
+
+        /// <summary>
+        /// Deletes an User Role by Name
+        /// </summary>
+        /// 
+        /// <param name="id">User Id</param>
+        /// <param name="roleName">Role Name</param>
+        /// <param name="cancellationToken">
+        /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
+        /// </param>
+        [HttpDelete("{id}/roles/{roleName}")]
+        public async Task<IActionResult> DeleteRolesFromUser(
+            [FromRoute] string id,
+            [FromRoute] string roleName,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound(id);
+
+            var role = await _roleManager.FindByNameAsync(roleName);
+
+            if (role == null)
+                return NotFound(roleName);
+
+            try
+            {
+                await _userManager.RemoveFromRoleAsync(user, roleName);
+                return Ok(roleName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        #endregion
 
     }
 }

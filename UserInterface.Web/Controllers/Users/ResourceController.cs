@@ -1,4 +1,4 @@
-﻿/*using AutoMapper;
+﻿using AutoMapper;
 using Core.DataAccess.IRepository.Users;
 using Microsoft.AspNetCore.Mvc;
 using UserInterface.Web.ViewModels.Users;
@@ -41,7 +41,7 @@ namespace UserInterface.Web.Controllers.Users
 
             try
             {
-                var result = await _resourceRepository.GetAllResourcesAsync(cancellationToken);
+                var result = await _resourceRepository.GetAllAsync(cancellationToken);
                 var resources = _mapper.Map<List<ResourceModel>>(result);
 
                 return Ok(resources);
@@ -53,4 +53,3 @@ namespace UserInterface.Web.Controllers.Users
         }
     }
 }
-*/

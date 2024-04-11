@@ -48,7 +48,7 @@
         public const string RevokeRoleToUser = nameof(RevokeRoleToUser);
 
         /// <summary>
-        /// Changes a user's password.
+        /// Changes a user password.
         /// </summary>
         public const string ChangePassword = nameof(ChangePassword);
 

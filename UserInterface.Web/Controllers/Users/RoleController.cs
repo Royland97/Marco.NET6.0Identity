@@ -3,6 +3,7 @@ using Core.DataAccess.IRepository.Users;
 using Core.Domain.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using UserInterface.Web.ViewModels.Users;
 
 namespace UserInterface.Web.Controllers.Users
@@ -38,7 +39,6 @@ namespace UserInterface.Web.Controllers.Users
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpPost]
-        [ProducesResponseType(typeof(RoleModel), StatusCodes.Status201Created)]
         public async Task<IActionResult> Save(
             [FromBody] RoleModel roleModel,
             CancellationToken cancellationToken = default)
@@ -48,17 +48,14 @@ namespace UserInterface.Web.Controllers.Users
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            var roleExists = await _roleManager.FindByIdAsync(roleModel.Id);
+            if(roleExists != null)
+                return StatusCode(StatusCodes.Status403Forbidden, "The Role already exists");
+
             var role = _mapper.Map<Role>(roleModel);
 
-            if (!roleModel.ResourcesIds.Any())
-            {
-                var resources = await _resourceRepository.GetAllByIdsAsync(roleModel.ResourcesIds, cancellationToken);
-
-                foreach (var resource in resources)
-                    role.Resources.Add(resource);
-            }
-
             var result = await _roleManager.CreateAsync(role);
+            await _roleManager.AddClaimAsync(role, new Claim(ClaimTypes.Name, role.Name));
 
             return result.Succeeded
                 ? StatusCode(StatusCodes.Status201Created, roleModel)
@@ -72,10 +69,7 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// <response code="200">Role updated successfully</response>
-        /// <response code="400">Bad request, invalid role data</response>
         [HttpPut]
-        [ProducesResponseType(typeof(RoleModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> Update(
             [FromBody] RoleModel roleModel,
             CancellationToken cancellationToken = default)
@@ -87,17 +81,17 @@ namespace UserInterface.Web.Controllers.Users
 
             try
             {
-                var role = _mapper.Map<Role>(roleModel);
-                
-                var resources = await _resourceRepository.GetAllByIdsAsync(roleModel.ResourcesIds, cancellationToken);
+                var role = await _roleManager.FindByIdAsync(roleModel.Id);
 
-                role.Resources.Clear();
-                foreach (var resource in resources)
-                    role.Resources.Add(resource);
+                if(role == null)
+                    return NotFound(roleModel.Id);
 
-                await _roleManager.UpdateAsync(role);
+                role = _mapper.Map(roleModel, role);
+                var result = await _roleManager.UpdateAsync(role);
 
-                return Ok(roleModel);
+                return result.Succeeded
+                    ? StatusCode(StatusCodes.Status201Created, roleModel)
+                    : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
             }
             catch (Exception ex)
             {
@@ -109,15 +103,11 @@ namespace UserInterface.Web.Controllers.Users
         /// Deletes a role.
         /// </summary>
         /// 
-        /// <param name="id">Id of the Role to delete</param>
+        /// <param name="id">Role Id</param>
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// 
-        /// <response code="200">Role deleted successfully</response>
-        /// <response code="404">Role not found with the provided Id</response>
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Delete(
             [FromRoute] string id,
             CancellationToken cancellationToken = default)
@@ -131,8 +121,10 @@ namespace UserInterface.Web.Controllers.Users
 
             try
             {
-                await _roleManager.DeleteAsync(role);
-                return Ok(id);
+                var result = await _roleManager.DeleteAsync(role);
+                return result.Succeeded
+                    ? StatusCode(StatusCodes.Status200OK, id)
+                    : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
             }
             catch (Exception ex)
             {
@@ -146,47 +138,34 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// <response code="200">Role found with the provided search options</response>
         [HttpGet]
-        [ProducesResponseType(typeof(List<RoleModelList>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
-            {
-                var result = await _roleRepository.GetAllAsync(cancellationToken);
-                var roles = _mapper.Map<List<RoleModelList>>(result);
+            var result = await _roleRepository.GetAllAsync(cancellationToken);
+            var roles = _mapper.Map<ICollection<RoleModelList>>(result);
 
-                return Ok(roles);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(roles);
         }
 
         /// <summary>
-        /// Gets a Role by it's id.
+        /// Gets a Role by Id.
         /// </summary>
         /// 
-        /// <param name="id">Id of the Role</param>
+        /// <param name="id">Role Id</param>
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        /// 
-        /// <response code="200">Role data</response>
-        /// <response code="404">Role not found with the provided ID</response>
-        [HttpGet("{id:int}")]
-        [ProducesResponseType(typeof(RoleModel), StatusCodes.Status200OK)]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(
-            [FromRoute] int id,
+            [FromRoute] string id,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var role = await _roleRepository.GetByIdAsync(id, cancellationToken);
+            var role = await _roleManager.FindByIdAsync(id);
 
             if (role == null)
                 return NotFound(id);
@@ -195,5 +174,76 @@ namespace UserInterface.Web.Controllers.Users
 
             return Ok(roleModel);
         }
+
+        #region Resources
+
+        /// <summary>
+        /// Gets all Role Resources by Id
+        /// </summary>
+        /// 
+        /// <param name="id">Role Id</param>
+        /// <param name="cancellationToken">
+        /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
+        /// </param>
+        [HttpGet("{id}/resources")]
+        public async Task<IActionResult> GetResourcesByRoleId(
+            [FromRoute] string id,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var role = await _roleManager.FindByIdAsync(id);
+
+            if (role == null)
+                return NotFound(id);
+
+            return Ok(role.Resources?.ToList());
+        }
+
+        /// <summary>
+        /// Add a Resources List to Role
+        /// </summary>
+        /// <param name="id">Role Id</param>
+        /// <param name="resourcesIds">Resources List</param>
+        /// <param name="cancellationToken">
+        /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
+        /// </param>
+        [HttpPut("{id}/resources")]
+        public async Task<IActionResult> AddResourcesToRole(
+            [FromRoute] string id,
+            [FromBody] List<string> resourcesIds,
+            CancellationToken cancellationToken = default)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var role = await _roleManager.FindByIdAsync(id);
+
+            if (role == null)
+                return NotFound(id);
+
+            if (resourcesIds.Any())
+            {
+                var resources = await _resourceRepository.GetAllByIdsAsync(resourcesIds, cancellationToken);
+
+                role.Resources.Clear();
+                foreach (var resource in resources)
+                    role.Resources.Add(resource);
+
+                var result = await _roleManager.UpdateAsync(role);
+
+                return result.Succeeded
+                    ? StatusCode(StatusCodes.Status201Created, resourcesIds)
+                    : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
+            }
+            else
+            {
+                return BadRequest("The Resource List contains any elements");
+            }
+        }
+
+        #endregion
     }
 }

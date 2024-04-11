@@ -90,15 +90,15 @@ namespace Infrastructure.DataAccess.Repository
         }
 
         /// <summary>
-        /// Deletes an entity by it's Id
+        /// Deletes an entity by Id
         /// </summary>
-        /// <param name="id">The Id of the entity to be deleted</param>
+        /// <param name="id">Entity Id</param>
         /// <param name="cancellationToken"></param>
         /// <exception cref="OperationCanceledException"></exception>
-        public async Task DeleteByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task DeleteByIdAsync(string id, CancellationToken cancellationToken)
         {
-            if (id <= 0)
-                throw new OperationCanceledException("Id is not valid");
+            if (string.IsNullOrEmpty(id))
+                throw new OperationCanceledException(id + " is not valid");
 
             TEntity entity = await GetByIdAsync(id, cancellationToken);
 
@@ -109,25 +109,25 @@ namespace Infrastructure.DataAccess.Repository
         }
 
         /// <summary>
-        /// Gets an Entity by it's Id
+        /// Gets an Entity by Id
         /// </summary>
-        /// <param name="id">The id of the entity to be found</param>
+        /// <param name="id">Entity Id</param>
         /// <param name="cancellationToken"></param>
-        public async Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<TEntity> GetByIdAsync(string id, CancellationToken cancellationToken)
         {
-            if(id <= 0)
+            if(string.IsNullOrEmpty(id))
                 return null;
 
             return await dbSet.FindAsync(new object?[] { id }, cancellationToken);
         }
 
         /// <summary>
-        /// Gets all Entities by a list of Id's 
+        /// Gets all Entities by Id List 
         /// </summary>
-        /// <param name="ids"></param>
+        /// <param name="ids">Id List</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
+        public async Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
         {
             List<TEntity> entities = new ();
 

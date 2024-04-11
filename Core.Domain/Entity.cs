@@ -8,9 +8,9 @@ namespace Core.Domain
     public abstract class Entity
     {
         /// <summary>
-        /// Gets or sets the entity ID.
+        /// Entity ID.
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; protected set; }
+        public string Id { get; protected set; }
     }
 }

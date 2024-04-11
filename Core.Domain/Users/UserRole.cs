@@ -3,7 +3,7 @@
 namespace Core.Domain.Users
 {
     /// <summary>
-    /// Represent the association between User and Role
+    /// Represents the association between User and Role
     /// </summary>
     public class UserRole: IdentityUserRole<string>
     {

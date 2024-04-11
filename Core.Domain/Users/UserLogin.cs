@@ -3,7 +3,7 @@
 namespace Core.Domain.Users
 {
     /// <summary>
-    /// Represent the User Login
+    /// Represents the User Login
     /// </summary>
     public class UserLogin: IdentityUserLogin<string>
     {

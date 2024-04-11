@@ -19,25 +19,5 @@ namespace Infrastructure.DataAccess.Repository.Users
         {
         }
 
-        /// <summary>
-        /// Gets All Roles by their Ids
-        /// </summary>
-        /// <param name="ids"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task<List<Role>> GetAllRoleByIdsAsync(List<int> ids, CancellationToken cancellationToken)
-        {
-            List<Role> roles = new();
-
-            foreach (int id in ids)
-            {
-                var role = await GetByIdAsync(id, cancellationToken);
-                if (role != null)
-                    roles.Add(role);
-            }
-
-            return roles;
-        }
-
     }
 }
