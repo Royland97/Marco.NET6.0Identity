@@ -16,7 +16,5 @@ namespace UserInterface.Web.ViewModels.Authentication
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
-
-        public bool Active { get; set; }
     }
 }

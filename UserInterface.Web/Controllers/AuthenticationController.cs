@@ -1,7 +1,12 @@
 ﻿using AutoMapper;
 using Core.Domain.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using UserInterface.Web.ViewModels.Authentication;
 
 namespace UserInterface.Web.Controllers
@@ -9,25 +14,20 @@ namespace UserInterface.Web.Controllers
     /// <summary>
     /// Authentication Api Controller
     /// </summary>
-    [Route("/authentication")]
+    [Authorize]
     [ApiController]
+    [Route("api/login")]
     public class AuthenticationController: Controller
     {
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<Role> _roleManager;
         private readonly IConfiguration _configuration;
-        private IMapper _mapper;
 
         public AuthenticationController(
             UserManager<User> userManager,
-            RoleManager<Role> roleManager,
-            IConfiguration configuration,
-            IMapper mapper)
+            IConfiguration configuration)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _configuration = configuration;
-            _mapper = mapper;
         }
 
         /// <summary>
@@ -38,7 +38,8 @@ namespace UserInterface.Web.Controllers
         /// <returns></returns>
         /// <exception cref="ApplicationException"></exception>
         [HttpPost]
-        public async Task<IActionResult> Registrer(
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(
             [FromBody]RegisterModel registerModel,
             CancellationToken cancellationToken = default)
         {
@@ -47,26 +48,39 @@ namespace UserInterface.Web.Controllers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            try
+            var user = await _userManager.FindByEmailAsync(registerModel.Email);
+            if (user == null)
+                return BadRequest("Invalid credentials");
+
+            var token = GenerateToken(registerModel);
+
+            return Ok(new { token });
+        }
+
+        /// <summary>
+        /// Generates a Token
+        /// </summary>
+        /// <param name="registerModel"></param>
+        /// <returns></returns>
+        private string GenerateToken(RegisterModel registerModel)
+        {
+            var claims = new[]
             {
-                var userExists = await _userManager.FindByEmailAsync(registerModel.Email);
-                if (userExists != null)
-                    return StatusCode(StatusCodes.Status403Forbidden, "The User already exists");
+                new Claim(ClaimTypes.Name, registerModel.UserName),
+                new Claim(ClaimTypes.Email, registerModel.Email),
+            };
 
-                var identityUser = _mapper.Map<User>(registerModel);
-                identityUser.SecurityStamp = Guid.NewGuid().ToString();
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-                var result = await _userManager.CreateAsync(identityUser, registerModel.Password);
+            var securityToken = new JwtSecurityToken(
+                                    claims: claims,
+                                    expires: DateTime.Now.AddHours(24),
+                                    signingCredentials: creds);
 
-                return result.Succeeded
-                    ? StatusCode(StatusCodes.Status201Created, registerModel)
-                    : StatusCode(StatusCodes.Status500InternalServerError, result.Errors);
-            }
-            catch(Exception ex)
-            {
-                throw new ApplicationException(ex.Message);
-            }
-            
+            var token = new JwtSecurityTokenHandler().WriteToken(securityToken);
+
+            return token;
         }
 
     }

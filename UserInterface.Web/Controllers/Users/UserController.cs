@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using UserInterface.Web.Authorization;
 using UserInterface.Web.ViewModels.Authentication;
 using UserInterface.Web.ViewModels.Users;
 
@@ -14,29 +13,27 @@ namespace UserInterface.Web.Controllers.Users
     /// <summary>
     /// User Api Controller
     /// </summary>
-    [Route("/users")]
+    [Authorize]
     [ApiController]
+    [Route("api/users")]
     public class UserController : Controller
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        private readonly IAuthorizationService _authorizationService;
         private readonly IRoleRepository _roleRepository;
 
         public UserController(
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
-            IAuthorizationService authorizationService,
             IUserRepository userRepository,
             IRoleRepository roleRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
-            _authorizationService = authorizationService;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
         }
@@ -63,6 +60,8 @@ namespace UserInterface.Web.Controllers.Users
                 return StatusCode(StatusCodes.Status403Forbidden, "The User already exists");
 
             var user = _mapper.Map<User>(registerModel);
+
+            user.Active = true;
 
             var result = await _userManager.CreateAsync(user, registerModel.Password);
             await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Email, user.Email));
@@ -149,12 +148,7 @@ namespace UserInterface.Web.Controllers.Users
         [HttpGet]
         public async Task<IActionResult> GetAll(
             CancellationToken cancellationToken = default)
-        {/*
-            var authorize = await _authorizationService.AuthorizeAsync(User, ResourcesNames.GetAllUsers, "ResourceAuthorize");
-
-            if (!authorize.Succeeded)
-                return Unauthorized();*/
-
+        {
             cancellationToken.ThrowIfCancellationRequested();
             
             var result = await _userRepository.GetAllAsync(cancellationToken);
@@ -171,6 +165,7 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(
             [FromRoute] string id,

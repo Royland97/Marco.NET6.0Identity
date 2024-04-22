@@ -9,6 +9,10 @@ using Infrastructure.DataAccess.Repository.Users;
 using UserInterface.Web.Installation;
 using Infrastructure.DataAccess.EntityFrameworkCore;
 using Core.Domain.Users;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
 
 namespace UserInterface.Web
 {
@@ -31,7 +35,6 @@ namespace UserInterface.Web
             builder.WebHost.UseKestrel(opt => opt.AddServerHeader = false);
             builder.Configuration.AddJsonFile("appsettings.json", true, true);
             builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true);
-            builder.Configuration.AddJsonFile("settings.json", true, true);
             builder.Configuration.AddEnvironmentVariables();
             builder.Configuration.SetBasePath(builder.Environment.ContentRootPath);
 
@@ -42,17 +45,23 @@ namespace UserInterface.Web
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web")));
 
             //Authentication and Authorization
-            builder.Services.AddAuthentication(options =>
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                };
             });
-
+            /*
             builder.Services.AddAuthorization(options =>
             {
+                options.AddPolicy("Admin", policy => policy.RequireClaim("Admin"));
                 options.AddPolicy("ResourceAuthorize", policy => policy.Requirements.Add(new ResourceAuthorizationRequirement()));
-            });
+            });*/
 
             //Identity
             builder.Services.AddIdentity<User, Role>()
@@ -95,12 +104,15 @@ namespace UserInterface.Web
             builder.Services.AddAutoMapper(typeof(BaseProfile));
 
             builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options => {
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+            });
 
             //Dependencies
             builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
             builder.Services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
             builder.Services.AddScoped(typeof(IResourceRepository), typeof(ResourceRepository));
-            //builder.Services.AddScoped(typeof(IAuthorizationHandler), typeof(ResourceAuthorizationHandler));
 
             #endregion
 
@@ -125,7 +137,8 @@ namespace UserInterface.Web
 
             if (app.Environment.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseStaticFiles(new StaticFileOptions
@@ -141,11 +154,9 @@ namespace UserInterface.Web
 
             app.UseAuthentication();
             app.UseAuthorization();
-            
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/");
 
+            app.MapControllers();
+            
             app.Run();
 
             #endregion
