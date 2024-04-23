@@ -54,14 +54,14 @@
         /// <param name="id">Entity Id to be deleted</param>
         /// <param name="cancellationToken"></param>
         /// <exception cref="OperationCanceledException"></exception>
-        Task DeleteByIdAsync(string id, CancellationToken cancellationToken);
+        Task DeleteByIdAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets an Entity by Id
         /// </summary>
         /// <param name="id">Entity Id to be found</param>
         /// <param name="cancellationToken"></param>
-        Task<TEntity> GetByIdAsync(string id, CancellationToken cancellationToken);
+        Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets all Entities by Id List
@@ -69,12 +69,20 @@
         /// <param name="ids">Id List</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken);
+        Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets all Entities
         /// </summary>
         /// <param name="cancellationToken"></param>
         Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Get an Entity by a key value
+        /// </summary>
+        /// <param name="keyValue"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TEntity> GetByKeyValueAsync(object? keyValue, CancellationToken cancellationToken);
     }
 }

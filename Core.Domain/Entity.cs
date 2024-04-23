@@ -11,6 +11,6 @@ namespace Core.Domain
         /// Entity ID.
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; protected set; }
+        public int Id { get; protected set; }
     }
 }

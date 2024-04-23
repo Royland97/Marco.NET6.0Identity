@@ -5,7 +5,7 @@ namespace Core.DataAccess.IRepository.Users
     /// <summary>
     /// User Repository Interface
     /// </summary>
-    public interface IUserRepository: IGenericRepository<User>
+    public interface IUserRepository
     {
     }
 }

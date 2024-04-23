@@ -15,18 +15,15 @@ namespace UserInterface.Web.Controllers.Users
     public class RoleController : Controller
     {
         private readonly RoleManager<Role> _roleManager;
-        private readonly IRoleRepository _roleRepository;
         private readonly IResourceRepository _resourceRepository;
         private readonly IMapper _mapper;
 
         public RoleController(
             RoleManager<Role> roleManager,
-            IRoleRepository roleRepository,
             IResourceRepository resourceRepository,
             IMapper mapper)
         {
             _roleManager = roleManager;
-            _roleRepository = roleRepository;
             _resourceRepository = resourceRepository;
             _mapper = mapper;
         }
@@ -139,12 +136,12 @@ namespace UserInterface.Web.Controllers.Users
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpGet]
-        public async Task<IActionResult> GetAll(
+        public IActionResult GetAll(
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var result = await _roleRepository.GetAllAsync(cancellationToken);
+            var result = _roleManager.Roles.ToList();
             var roles = _mapper.Map<ICollection<RoleModelList>>(result);
 
             return Ok(roles);
@@ -211,7 +208,7 @@ namespace UserInterface.Web.Controllers.Users
         [HttpPut("{id}/resources")]
         public async Task<IActionResult> AddResourcesToRole(
             [FromRoute] string id,
-            [FromBody] List<string> resourcesIds,
+            [FromBody] List<int> resourcesIds,
             CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)

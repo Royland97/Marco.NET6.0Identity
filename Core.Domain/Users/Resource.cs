@@ -23,7 +23,7 @@ namespace Core.Domain.Users
         [Required]
         public string Description { get; set; }
 
-        #region Relationships
+        #region Relations
 
         /// <summary>
         /// Gets the Resource Roles

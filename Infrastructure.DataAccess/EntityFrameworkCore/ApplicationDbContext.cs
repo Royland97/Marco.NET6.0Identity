@@ -1,4 +1,6 @@
-﻿using Core.Domain.Users;
+﻿using Core.Domain.Loan;
+using Core.Domain.Users;
+using Infrastructure.DataAccess.EntityFrameworkCore.Loan;
 using Infrastructure.DataAccess.EntityFrameworkCore.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +23,16 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Resource> Resources { get; set; }
+        public DbSet<Person> Persons { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            //new EntityModelBuilder().Configure(modelBuilder);
             new UsersModelBuilder().Configure(modelBuilder);
+            new LoanModelBuilder().Configure(modelBuilder);
             SeedRoles(modelBuilder);
         }
         

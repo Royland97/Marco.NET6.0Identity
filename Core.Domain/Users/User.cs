@@ -14,7 +14,7 @@ namespace Core.Domain.Users
         /// </summary>
         public bool Active { get; set; }
 
-        #region Relationships
+        #region Relations
         
         /// <summary>
         /// Gets the User Claims 

@@ -95,9 +95,9 @@ namespace Infrastructure.DataAccess.Repository
         /// <param name="id">Entity Id</param>
         /// <param name="cancellationToken"></param>
         /// <exception cref="OperationCanceledException"></exception>
-        public async Task DeleteByIdAsync(string id, CancellationToken cancellationToken)
+        public async Task DeleteByIdAsync(int id, CancellationToken cancellationToken)
         {
-            if (string.IsNullOrEmpty(id))
+            if (id <= 0)
                 throw new OperationCanceledException(id + " is not valid");
 
             TEntity entity = await GetByIdAsync(id, cancellationToken);
@@ -113,9 +113,9 @@ namespace Infrastructure.DataAccess.Repository
         /// </summary>
         /// <param name="id">Entity Id</param>
         /// <param name="cancellationToken"></param>
-        public async Task<TEntity> GetByIdAsync(string id, CancellationToken cancellationToken)
+        public async Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            if(string.IsNullOrEmpty(id))
+            if(id <= 0)
                 return null;
 
             return await dbSet.FindAsync(new object?[] { id }, cancellationToken);
@@ -127,7 +127,7 @@ namespace Infrastructure.DataAccess.Repository
         /// <param name="ids">Id List</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<string> ids, CancellationToken cancellationToken)
+        public async Task<List<TEntity>> GetAllByIdsAsync(IEnumerable<int> ids, CancellationToken cancellationToken)
         {
             List<TEntity> entities = new ();
 
@@ -144,6 +144,20 @@ namespace Infrastructure.DataAccess.Repository
         public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await dbSet.ToListAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Get an Entity by a key value
+        /// </summary>
+        /// <param name="keyValue"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<TEntity> GetByKeyValueAsync(object? keyValue, CancellationToken cancellationToken)
+        {
+            if (keyValue == null)
+                return null;
+
+            return await dbSet.FindAsync(new object?[] { keyValue }, cancellationToken);
         }
     }
 }

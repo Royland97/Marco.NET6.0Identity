@@ -20,7 +20,6 @@ namespace UserInterface.Web.Controllers.Users
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
-        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IRoleRepository _roleRepository;
 
@@ -28,13 +27,11 @@ namespace UserInterface.Web.Controllers.Users
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
-            IUserRepository userRepository,
             IRoleRepository roleRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
-            _userRepository = userRepository;
             _roleRepository = roleRepository;
         }
 
@@ -146,12 +143,12 @@ namespace UserInterface.Web.Controllers.Users
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
         [HttpGet]
-        public async Task<IActionResult> GetAll(
+        public IActionResult GetAll(
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             
-            var result = await _userRepository.GetAllAsync(cancellationToken);
+            var result = _userManager.Users.ToList();
             var users = _mapper.Map<ICollection<UserModelList>>(result);
 
             return Ok(users);

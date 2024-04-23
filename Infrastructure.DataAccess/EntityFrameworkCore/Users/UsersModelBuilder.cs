@@ -29,7 +29,7 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore.Users
             //Resource
             modelBuilder.Entity<Resource>(b =>
             {
-                b.HasKey(r => r.Id).HasName("PK_AspNetResources");
+                b.ToTable("AspNetResources");
                 
                 b.Property(r => r.Name).HasMaxLength(256);
                 b.Property(r => r.Description).HasMaxLength(256);

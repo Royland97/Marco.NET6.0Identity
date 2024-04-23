@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Core.DataAccess.IRepository.Loan;
+using Infrastructure.DataAccess.Repository.Loan;
 
 namespace UserInterface.Web
 {
@@ -113,6 +115,8 @@ namespace UserInterface.Web
             builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
             builder.Services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
             builder.Services.AddScoped(typeof(IResourceRepository), typeof(ResourceRepository));
+            builder.Services.AddScoped(typeof(IPersonRepository), typeof(PersonRepository));
+            builder.Services.AddScoped(typeof(IPaymentRepository), typeof(PaymentRepository));
 
             #endregion
 
