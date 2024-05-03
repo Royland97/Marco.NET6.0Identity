@@ -143,6 +143,7 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
+        [Authorize(Policy = "ActivePolicy")]
         [HttpGet]
         public IActionResult GetAll(
             CancellationToken cancellationToken = default)

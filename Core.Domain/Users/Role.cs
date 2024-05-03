@@ -8,7 +8,18 @@ namespace Core.Domain.Users
     /// </summary>
     public class Role: IdentityRole
     {
+        /// <summary>
+        /// Get the name to build the Administrator Role
+        /// </summary>
+        public const string Admin = "Admin";
+
         #region Fields
+
+        /// <summary>
+        /// Role name
+        /// </summary>
+        [Required]
+        public string Name { get; set; }
 
         /// <summary>
         /// Role description.

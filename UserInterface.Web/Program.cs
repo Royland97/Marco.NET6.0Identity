@@ -68,7 +68,7 @@ namespace UserInterface.Web
             
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("Admin", policy => policy.RequireClaim("Admin"));
+                options.AddPolicy("ActivePolicy", policy => policy.RequireClaim("ActiveUser", "True"));
                 options.AddPolicy("ResourceAuthorize", policy => policy.Requirements.Add(new ResourceAuthorizationRequirement()));
             });
 

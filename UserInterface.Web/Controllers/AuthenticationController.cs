@@ -42,7 +42,7 @@ namespace UserInterface.Web.Controllers
             var user = await _userManager.FindByEmailAsync(registerModel.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, registerModel.Password))
             {
-                var token = GenerateToken(registerModel);
+                var token = GenerateToken(user);
 
                 return Ok(new {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -55,14 +55,15 @@ namespace UserInterface.Web.Controllers
         /// <summary>
         /// Generates a Token
         /// </summary>
-        /// <param name="registerModel"></param>
+        /// <param name="user"></param>
         /// <returns></returns>
-        private JwtSecurityToken GenerateToken(RegisterModel registerModel)
+        private JwtSecurityToken GenerateToken(User user)
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, registerModel.UserName),
-                new Claim(ClaimTypes.Email, registerModel.Email),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("ActiveUser", user.Active.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
