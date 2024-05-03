@@ -9,7 +9,6 @@ using Infrastructure.DataAccess.Repository.Users;
 using UserInterface.Web.Installation;
 using Infrastructure.DataAccess.EntityFrameworkCore;
 using Core.Domain.Users;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -47,29 +46,42 @@ namespace UserInterface.Web
                 options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web")));
 
             //Authentication and Authorization
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            builder.Services.AddAuthentication(options =>
             {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
                 };
             });
-            /*
+            
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Admin", policy => policy.RequireClaim("Admin"));
                 options.AddPolicy("ResourceAuthorize", policy => policy.Requirements.Add(new ResourceAuthorizationRequirement()));
-            });*/
+            });
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.ForwardDefault = JwtBearerDefaults.AuthenticationScheme;
+            });
 
             //Identity
             builder.Services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
-
+            
             builder.Services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
@@ -79,17 +91,12 @@ namespace UserInterface.Web
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 5;
                 options.Password.RequiredUniqueChars = 1;
-
-                // Lockout settings.
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-
+                
                 // User settings.
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = false;
             });
-
+            
             //CORS
             builder.Services.AddCors(options =>
             {
@@ -99,7 +106,6 @@ namespace UserInterface.Web
                         policy.AllowAnyHeader();
                         policy.AllowAnyMethod();
                         policy.AllowAnyOrigin();
-                        //policy.AllowCredentials();
                     });
             });
 
@@ -107,8 +113,33 @@ namespace UserInterface.Web
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
+
+            //Swagger
             builder.Services.AddSwaggerGen(options => {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+                options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please enter a valid token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "Jwt",
+                    Scheme = JwtBearerDefaults.AuthenticationScheme
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = JwtBearerDefaults.AuthenticationScheme
+                            }
+                        },
+                        new string[] { } 
+                    }
+                });
             });
 
             //Dependencies

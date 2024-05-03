@@ -2,6 +2,7 @@
 using Core.DataAccess.IRepository.Loan;
 using Core.Domain.Loan;
 using Infrastructure.DataAccess.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserInterface.Web.ViewModels.Loan;
 
@@ -10,6 +11,7 @@ namespace UserInterface.Web.Controllers.Loan
     /// <summary>
     /// Payment Api Controller
     /// </summary>
+    [Authorize]
     [ApiController]
     [Route("api/loan/payment")]
     public class PaymentController: Controller

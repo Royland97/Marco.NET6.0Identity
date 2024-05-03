@@ -42,6 +42,7 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Register(
             [FromBody] RegisterModel registerModel,
@@ -162,7 +163,6 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
-        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(
             [FromRoute] string id,
