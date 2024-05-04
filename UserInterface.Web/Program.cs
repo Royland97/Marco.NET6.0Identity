@@ -84,6 +84,9 @@ namespace UserInterface.Web
             
             builder.Services.Configure<IdentityOptions>(options =>
             {
+                //SignIn settings
+                //options.SignIn.RequireConfirmedEmail = true;
+
                 // Password settings.
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = true;

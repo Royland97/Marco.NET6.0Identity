@@ -114,6 +114,7 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(
             [FromRoute] string id,
@@ -216,6 +217,7 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}/roles")]
         public async Task<IActionResult> AddRolesToUser(
             [FromRoute] string id,
@@ -262,6 +264,7 @@ namespace UserInterface.Web.Controllers.Users
         /// <param name="cancellationToken">
         /// The <see cref="CancellationToken" /> used to propagate notifications that the operation should be canceled.
         /// </param>
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}/roles/{roleName}")]
         public async Task<IActionResult> DeleteRolesFromUser(
             [FromRoute] string id,

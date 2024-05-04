@@ -42,7 +42,7 @@ namespace UserInterface.Web.Controllers
             var user = await _userManager.FindByEmailAsync(registerModel.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, registerModel.Password))
             {
-                var token = GenerateToken(user);
+                var token = await GenerateTokenAsync(user);
 
                 return Ok(new {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -57,14 +57,18 @@ namespace UserInterface.Web.Controllers
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        private JwtSecurityToken GenerateToken(User user)
+        private async Task<JwtSecurityToken> GenerateTokenAsync(User user)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim("ActiveUser", user.Active.ToString())
             };
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+            foreach(var role in userRoles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
