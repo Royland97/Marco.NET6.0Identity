@@ -13,13 +13,12 @@ namespace Core.Domain.Users
         /// </summary>
         public const string Admin = "Admin";
 
-        #region Fields
-
         /// <summary>
-        /// Role name
+        /// Get the name to build the User Role
         /// </summary>
-        [Required]
-        public string Name { get; set; }
+        public const string User = "User";
+
+        #region Fields
 
         /// <summary>
         /// Role description.

@@ -39,8 +39,8 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
         private static void SeedRoles(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Role>().HasData(
-                    new Role() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "ADMIN", Active = true, Description = "Role for the admin user" },
-                    new Role() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "USER", Active = true, Description = "Role for the system user" }
+                    new Role() { Name = Role.Admin, ConcurrencyStamp = "1", NormalizedName = "ADMIN", Active = true, Description = "Role for the admin user" },
+                    new Role() { Name = Role.User, ConcurrencyStamp = "2", NormalizedName = "USER", Active = true, Description = "Role for the system user" }
                 );
         }
 

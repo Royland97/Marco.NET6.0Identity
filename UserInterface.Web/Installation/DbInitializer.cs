@@ -23,7 +23,7 @@ namespace UserInterface.Web.Installation
                 //await _installResources.InstallAsync();
 
                 //User
-                var adminRole = await applicationDbContext.Roles.FindAsync("Admin");
+                var adminRole = await applicationDbContext.Roles.FindAsync(Role.Admin);
                 var adminUser = new User
                 {
                     UserName = "admin",
