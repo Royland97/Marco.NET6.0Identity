@@ -46,7 +46,7 @@ namespace UserInterface.Web.Controllers
 
                 return Ok(new {
                     token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
+                    expires = token.ValidTo
                 });
             }
             return Unauthorized("Invalid credentials");
