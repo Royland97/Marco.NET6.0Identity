@@ -34,7 +34,6 @@ namespace UserInterface.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.WebHost.UseKestrel(opt => opt.AddServerHeader = false);
             builder.Configuration.AddJsonFile("appsettings.json", true, true);
             builder.Configuration.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true);
             builder.Configuration.AddEnvironmentVariables();
@@ -120,7 +119,7 @@ namespace UserInterface.Web
 
             //Swagger
             builder.Services.AddSwaggerGen(options => {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Title = "API .NET 6.0" });
                 options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
@@ -177,17 +176,15 @@ namespace UserInterface.Web
                 }
             }
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
+            /*
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Static")),
                 RequestPath = "/Static"
-            });
+            });*/
 
             app.UseHttpsRedirection();
 
