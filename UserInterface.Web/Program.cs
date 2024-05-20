@@ -43,8 +43,13 @@ namespace UserInterface.Web
 
             //DBContext
             builder.Services.AddDbContext<ApplicationDbContext>(
-                options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web")));
-
+                options =>
+                {
+                    //options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web"));
+                    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"), b => b.MigrationsAssembly("UserInterface.Web"));
+                }
+            );
+                
             //Authentication and Authorization
             builder.Services.AddAuthentication(options =>
             {
