@@ -42,6 +42,9 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
                     new Role() { Name = Role.Admin, ConcurrencyStamp = "1", NormalizedName = "ADMIN", Active = true, Description = "Role for the admin user" },
                     new Role() { Name = Role.User, ConcurrencyStamp = "2", NormalizedName = "USER", Active = true, Description = "Role for the system user" }
                 );
+            modelBuilder.Entity<User>().HasData(
+                    new User() { UserName = "admin", NormalizedUserName = "ADMIN",  Email = "admin@example.com", NormalizedEmail = "ADMIN@EXAMPLE.COM", PhoneNumber = "12344321", Active = true }
+                );
         }
 
         #endregion

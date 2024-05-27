@@ -28,19 +28,19 @@ namespace UserInterface.Web.Controllers
         }
 
         /// <summary>
-        /// Register an User
+        /// Authenticate an User
         /// </summary>
-        /// <param name="registerModel"></param>
+        /// <param name="model">Authentication Model</param>
         /// <returns></returns>
         /// <exception cref="ApplicationException"></exception>
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody]RegisterModel registerModel)
+        public async Task<IActionResult> Login([FromBody]AuthenticationModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.FindByEmailAsync(registerModel.Email);
-            if (user != null && await _userManager.CheckPasswordAsync(user, registerModel.Password))
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var token = await GenerateTokenAsync(user);
 

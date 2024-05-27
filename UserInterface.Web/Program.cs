@@ -46,7 +46,8 @@ namespace UserInterface.Web
                 options =>
                 {
                     //options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web"));
-                    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"), b => b.MigrationsAssembly("UserInterface.Web"));
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DockerDB"), b => b.MigrationsAssembly("UserInterface.Web"));
+                    //options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"), b => b.MigrationsAssembly("UserInterface.Web"));
                 }
             );
                 
@@ -98,11 +99,10 @@ namespace UserInterface.Web
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredLength = 5;
-                options.Password.RequiredUniqueChars = 1;
                 
                 // User settings.
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
+                options.User.RequireUniqueEmail = true;
             });
             
             //CORS
@@ -154,6 +154,7 @@ namespace UserInterface.Web
             builder.Services.AddScoped(typeof(IUserRepository), typeof(UserRepository));
             builder.Services.AddScoped(typeof(IRoleRepository), typeof(RoleRepository));
             builder.Services.AddScoped(typeof(IResourceRepository), typeof(ResourceRepository));
+            builder.Services.AddScoped(typeof(IInstallResources), typeof(InstallResources));
             builder.Services.AddScoped(typeof(IEndPointServices), typeof(EndPointServices));
             builder.Services.AddScoped(typeof(ITokenServices), typeof(TokenServices));
             builder.Services.AddScoped(typeof(IHostNameServices), typeof(HostNameServices));
