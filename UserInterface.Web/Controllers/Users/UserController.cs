@@ -52,11 +52,7 @@ namespace UserInterface.Web.Controllers.Users
                 return BadRequest(ModelState);
 
             cancellationToken.ThrowIfCancellationRequested();
-
-            var userExists = await _userManager.FindByEmailAsync(registerModel.Email);
-            if (userExists != null)
-                return StatusCode(StatusCodes.Status403Forbidden, "The User already exists");
-
+            
             var user = _mapper.Map<User>(registerModel);
 
             user.Active = true;

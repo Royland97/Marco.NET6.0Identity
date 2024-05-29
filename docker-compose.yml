@@ -7,8 +7,8 @@ services:
       context: .
       dockerfile: UserInterface.Web/Dockerfile
     links:
-      - "sqlServer:database"
-  sqlServer:
+      - "SqlServer:database"
+  SqlServer:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - MSSQL_SA_PASSWORD=YourStrong!Passw0rd

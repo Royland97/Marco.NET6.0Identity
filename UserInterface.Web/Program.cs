@@ -45,8 +45,8 @@ namespace UserInterface.Web
             builder.Services.AddDbContext<ApplicationDbContext>(
                 options =>
                 {
-                    //options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web"));
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DockerDB"), b => b.MigrationsAssembly("UserInterface.Web"));
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServer"), b => b.MigrationsAssembly("UserInterface.Web"));
+                    //options.UseSqlServer(builder.Configuration.GetConnectionString("DockerSqlServer"), b => b.MigrationsAssembly("UserInterface.Web"));
                     //options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL"), b => b.MigrationsAssembly("UserInterface.Web"));
                 }
             );
@@ -94,12 +94,13 @@ namespace UserInterface.Web
                 //options.SignIn.RequireConfirmedEmail = true;
 
                 // Password settings.
-                options.Password.RequireDigit = false;
+                options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 5;
-                
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 1;
+
                 // User settings.
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
                 options.User.RequireUniqueEmail = true;

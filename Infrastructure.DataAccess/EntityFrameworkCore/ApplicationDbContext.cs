@@ -33,10 +33,10 @@ namespace Infrastructure.DataAccess.EntityFrameworkCore
             //new EntityModelBuilder().Configure(modelBuilder);
             new UsersModelBuilder().Configure(modelBuilder);
             new LoanModelBuilder().Configure(modelBuilder);
-            SeedRoles(modelBuilder);
+            SeedData(modelBuilder);
         }
         
-        private static void SeedRoles(ModelBuilder modelBuilder)
+        private static void SeedData(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Role>().HasData(
                     new Role() { Name = Role.Admin, ConcurrencyStamp = "1", NormalizedName = "ADMIN", Active = true, Description = "Role for the admin user" },

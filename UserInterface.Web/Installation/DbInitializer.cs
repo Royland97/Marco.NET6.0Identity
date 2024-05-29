@@ -1,4 +1,5 @@
-﻿using Core.Domain.Users;
+﻿using Core.DataAccess.IRepository.Users;
+using Core.Domain.Users;
 using Infrastructure.DataAccess.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 
@@ -9,17 +10,6 @@ namespace UserInterface.Web.Installation
     /// </summary>
     public class DbInitializer
     {
-        private readonly IInstallResources _installResources;
-        private readonly UserManager<User> _userManager;
-
-        public DbInitializer(
-            IInstallResources installResources,
-            UserManager<User> userManager)
-        {
-            _installResources = installResources;
-            _userManager = userManager;
-        }
-
         public async static Task Initialize(ApplicationDbContext applicationDbContext)
         {
             if( await applicationDbContext.Database.EnsureCreatedAsync())
@@ -31,28 +21,16 @@ namespace UserInterface.Web.Installation
                 if (adminRole == null && adminUser == null)
                     return;
 
-                /*adminUser.PasswordHash = await aux.Method(adminUser);
+                var password = new PasswordHasher<User>();
+                var hashed = password.HashPassword(adminUser, "Admin123.");
+                adminUser.PasswordHash = hashed;
 
-                applicationDbContext.Users.Update(adminUser);*/
+                applicationDbContext.Users.Update(adminUser);
                 await applicationDbContext.UserRoles.AddAsync(new UserRole { User = adminUser, Role = adminRole });
 
                 await applicationDbContext.SaveChangesAsync();
             };
         }
 
-        /// <summary>
-        /// Install all resources and hash password
-        /// </summary>
-        /// <returns></returns>
-        private async Task<string> Method(User adminUser)
-        {
-            //Resource
-            await _installResources.InstallAsync();
-
-            //Password Hashed
-            var hasedPassord = _userManager.PasswordHasher.HashPassword(adminUser, "Admin123");
-
-            return hasedPassord;
-        }
     }
 }
