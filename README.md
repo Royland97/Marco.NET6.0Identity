@@ -1,2 +1,2 @@
 # Marco.NET6.0
-Marco utilizando .NET6.0, Identity y Arquitectura Limpia 
+Work environment using .NET6.0, Identity and Clean Architecture
