@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  userinterface.web:
+    image: ${DOCKER_REGISTRY-}userinterfaceweb
+    build:
+      context: .
+      dockerfile: UserInterface.Web/Dockerfile
+    links:
+      - "SqlServer:database"
+  SqlServer:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+      - ACCEPT_EULA=Y
+    ports:
+      - "1401:1433"
